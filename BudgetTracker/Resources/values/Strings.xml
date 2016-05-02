@@ -2,4 +2,8 @@
 <resources>
 	<string name="hello">Hello World, Click Me!</string>
 	<string name="app_name">BudgetTracker</string>
+	<string name="DrawerOpenDescription">Open navigation drawer"</string>
+	<string name="DrawerCloseDescription">Close navigation drawer"></string>
+	<string name="category_prompt">Choose a category</string>
+	<string name="TransactionSaved">Transaction Saved</string>
 </resources>
