@@ -6,4 +6,12 @@
 	<string name="DrawerCloseDescription">Close navigation drawer"></string>
 	<string name="category_prompt">Choose a category</string>
 	<string name="TransactionSaved">Transaction Saved</string>
+	<string name="transactionHint">Transaction Amount</string>
+	<string name="transactionIncorrectFormat">You must enter a dollar amount</string>
+	<string name="saveTransaction">Save</string>
+	<string name="transactions">Transactions</string>
+	<string name="categories">Categories</string>
+	<string name="reports">Reports</string>
+	<string name="navigationHeader">Budget Tracker</string>
+	<string name="clear">Clear</string>
 </resources>

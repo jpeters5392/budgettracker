@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/transactionLayout"
     android:orientation="vertical"
     android:paddingTop="16dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:focusableInTouchMode="true">
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:id="@+id/amountInputLayout">
         <EditText
             android:id="@+id/transactionAmount"
-            android:text="0.00"
-            android:textSize="50dp"
+            android:text=""
+            android:inputType="number|numberDecimal"
             android:layout_gravity="center"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:hint="Transaction Amount" />
+            android:hint="@string/transactionHint" />
     </android.support.design.widget.TextInputLayout>
     <android.support.v7.widget.AppCompatSpinner
         android:id="@+id/categorySpinner"
@@ -23,7 +26,7 @@
         android:prompt="@string/category_prompt" />
     <Button
         android:id="@+id/saveButton"
-        android:text="Save"
+        android:text="@string/saveTransaction"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>

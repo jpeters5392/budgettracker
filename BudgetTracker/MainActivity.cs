@@ -6,6 +6,8 @@ using Android.Runtime;
 using Java.Lang;
 using Android.Views;
 using Android.Support.V7.App;
+using Android.Support.Design.Widget;
+using Android.Support.V4.View;
 
 namespace BudgetTracker
 {
@@ -13,11 +15,10 @@ namespace BudgetTracker
 	public class MainActivity : AppCompatActivity
 	{
 		DrawerLayout drawerLayout;
-		ActionBarDrawerToggle drawerToggle;
-		ListView drawerListView;
+		NavigationView navigationView;
 
 		Fragment[] fragments = new Fragment[] { new TransactionsFragment(), new CategoriesFragment(), new ReportsFragment() };
-		string[] titles =  new string[] { "Transactions", "Categories", "Reports" };
+		int[] titleResources = new int[] { Resource.String.transactions, Resource.String.categories, Resource.String.reports };
 
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
@@ -26,74 +27,101 @@ namespace BudgetTracker
 			// Set our view from the "main" layout resource
 			SetContentView (Resource.Layout.Main);
 
-			drawerLayout = FindViewById<DrawerLayout> (Resource.Id.drawerLayout);
-			drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, Resource.String.DrawerOpenDescription, Resource.String.DrawerCloseDescription);
-			drawerLayout.AddDrawerListener(drawerToggle);
+			// Set the v7 toolbar to be the view's action bar
+			var toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
+			SetSupportActionBar (toolbar);
 
 			// 
-			// Must up-enable the home button, the ActionBarDrawerToggle will change the icon to the "hamburger"
+			// Must up-enable the home button and then set the home icon to be the "hamburger"
 			//
 			SupportActionBar.SetDisplayHomeAsUpEnabled(true); 
+			SupportActionBar.SetHomeAsUpIndicator (Android.Resource.Drawable.IcMenuToday);
 
-			//
-			// Prepare the ListView that will serve as the menu
-			//
-			drawerListView = FindViewById<ListView>(Resource.Id.drawerListView);
-			drawerListView.Adapter = new BudgetTabAdapter(this, titles);
-			drawerListView.ItemClick += (object sender, AdapterView.ItemClickEventArgs e) => OnMenuItemClick(e.Position);
-			drawerListView.SetItemChecked(0, true);	// Highlight the first item at startup
-			OnMenuItemClick(0);
+			// get references to items in the view
+			drawerLayout = FindViewById<DrawerLayout> (Resource.Id.drawerLayout);
+			navigationView = FindViewById<NavigationView> (Resource.Id.nav_view);
+			navigationView.NavigationItemSelected += NavigateToItem;
+
+			// set the transactions fragment to be displayed by default
+			this.SetFragment (0);
 		}
 
-		protected override void OnPostCreate(Bundle savedInstanceState)
+		protected override void OnDestroy ()
 		{
-			//
-			// Initialization and any needed Restore operation are now complete.
-			// Sync the state of the ActionBarDrawerToggle to the drawer (i.e. show the "hamburger" if the drawer is closed or an arrow if it is open).
-			//
-			drawerToggle.SyncState();
+			if (this.fragments != null) {
+				foreach (var fragment in fragments) {
+					if (fragment != null) {
+						fragment.Dispose ();
+					}
+				}
+				this.fragments = null;
+			}
 
-			base.OnPostCreate(savedInstanceState);
+			if (this.drawerLayout != null) {
+				this.drawerLayout.Dispose ();
+			}
+
+			if (this.navigationView != null) {
+				navigationView.NavigationItemSelected -= NavigateToItem;
+				this.navigationView.Dispose ();
+			}
+
+			base.OnDestroy ();
 		}
 
-		void OnMenuItemClick(int position)
+		protected void NavigateToItem(object sender, NavigationView.NavigationItemSelectedEventArgs e)
 		{
-			//
-			// Show the selected Fragment to the user
-			//
-			base.FragmentManager.BeginTransaction().Replace(Resource.Id.frameLayout, fragments[position]).Commit();
+			e.MenuItem.SetChecked (true);
 
-			//
-			// Update the Activity title in the ActionBar
-			//
-			this.Title = titles[position];
+			int index = 0;
 
-			//
-			// Close the drawer
-			//
-			drawerLayout.CloseDrawer(drawerListView);
+			switch (e.MenuItem.ItemId)
+			{
+				case Resource.Id.nav_reports:
+					index = 2;
+					break;
+				case Resource.Id.nav_categories:
+					index = 1;
+					break;
+				case Resource.Id.nav_transactions:
+				default:
+					index = 0;
+					break;
+			}
+
+			this.SetFragment (index);
+
+			drawerLayout.CloseDrawers ();
 		}
 
 		public override bool OnOptionsItemSelected(IMenuItem item)
 		{
-			//
-			// Forward all ActionBar-clicks to the ActionBarDrawerToggle.
-			// It will verify the click was on the "Home" button (i.e. the button at the left edge of the ActionBar).
-			// If so, it will toggle the state of the drawer. It will then return "true" so you know you do not need to do any more processing.
-			//
-			if (drawerToggle.OnOptionsItemSelected(item))
-				return true;
-
 			//
 			// Other cases go here for other buttons in the ActionBar.
 			// This sample app has no other buttons. This code is a placeholder to show what would be needed if there were other buttons.
 			//
 			switch (item.ItemId)
 			{
-				default: break;
+			case Android.Resource.Id.Home:
+				if (drawerLayout.IsDrawerOpen (GravityCompat.Start)) 
+				{
+					drawerLayout.CloseDrawer (GravityCompat.Start);
+				} 
+				else 
+				{
+					drawerLayout.OpenDrawer (GravityCompat.Start);
+				}
+
+				return true;
 			}
 
 			return base.OnOptionsItemSelected(item);
+		}
+
+		private void SetFragment(int index)
+		{
+			this.FragmentManager.BeginTransaction ().Replace (Resource.Id.frameLayout, this.fragments [index]).Commit ();
+			this.Title = this.GetString(this.titleResources [index]);
 		}
 	}
 }

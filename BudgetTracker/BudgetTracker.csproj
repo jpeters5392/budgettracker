@@ -60,6 +60,9 @@
     <Reference Include="Xamarin.Android.Support.Design">
       <HintPath>..\packages\Xamarin.Android.Support.Design.23.3.0\lib\MonoAndroid43\Xamarin.Android.Support.Design.dll</HintPath>
     </Reference>
+    <Reference Include="Xamarin.Android.Support.v7.CardView">
+      <HintPath>..\packages\Xamarin.Android.Support.v7.CardView.23.3.0\lib\MonoAndroid403\Xamarin.Android.Support.v7.CardView.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainActivity.cs" />
@@ -68,7 +71,10 @@
     <Compile Include="fragments\TransactionsFragment.cs" />
     <Compile Include="fragments\CategoriesFragment.cs" />
     <Compile Include="fragments\ReportsFragment.cs" />
-    <Compile Include="adapters\BudgetTabAdapter.cs" />
+    <Compile Include="adapters\CategoriesAdapter.cs" />
+    <Compile Include="viewHolders\CategoryViewHolder.cs" />
+    <Compile Include="models\Category.cs" />
+    <Compile Include="models\CategoryType.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
@@ -88,11 +94,19 @@
     <AndroidResource Include="Resources\layout\NavigationDrawerListView.axml" />
     <AndroidResource Include="Resources\layout\Categories.axml" />
     <AndroidResource Include="Resources\layout\Reports.axml" />
+    <AndroidResource Include="Resources\menu\nav_menu.axml" />
+    <AndroidResource Include="Resources\layout\drawer_header.axml" />
+    <AndroidResource Include="Resources\layout\Toolbar.axml" />
+    <AndroidResource Include="Resources\values\style.xml" />
+    <AndroidResource Include="Resources\layout\CategoryListItem.axml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\drawable\" />
     <Folder Include="fragments\" />
     <Folder Include="adapters\" />
+    <Folder Include="Resources\menu\" />
+    <Folder Include="viewHolders\" />
+    <Folder Include="models\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Import Project="..\packages\Xamarin.Android.Support.Vector.Drawable.23.3.0\build\Xamarin.Android.Support.Vector.Drawable.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Vector.Drawable.23.3.0\build\Xamarin.Android.Support.Vector.Drawable.targets')" />
