@@ -35,7 +35,7 @@ namespace BudgetTracker
 			// Must up-enable the home button and then set the home icon to be the "hamburger"
 			//
 			SupportActionBar.SetDisplayHomeAsUpEnabled(true); 
-			SupportActionBar.SetHomeAsUpIndicator (Android.Resource.Drawable.IcMenuToday);
+			SupportActionBar.SetHomeAsUpIndicator (Resource.Drawable.ic_menu_white);
 
 			// get references to items in the view
 			drawerLayout = FindViewById<DrawerLayout> (Resource.Id.drawerLayout);
