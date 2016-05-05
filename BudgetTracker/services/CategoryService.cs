@@ -46,6 +46,13 @@ namespace BudgetTracker
 		public void Delete(int position) {
 			categories.RemoveAt (position);
 		}
+
+		public void Insert(Category category) {
+			if (category.Id == Guid.Empty ()) {
+				category.Id = Guid.NewGuid ();
+			}
+			categories.Add (category);
+		}
 	}
 }
 
