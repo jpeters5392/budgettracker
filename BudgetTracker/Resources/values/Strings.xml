@@ -14,4 +14,14 @@
 	<string name="reports">Reports</string>
 	<string name="navigationHeader">Budget Tracker</string>
 	<string name="clear">Clear</string>
+	<string name="delete">Delete</string>
+	<string name="cancel">Cancel</string>
+	<string name="edit">Edit</string>
+	<string name="save">Save</string>
+	<string name="description">Description</string>
+	<string name="name">Name</string>
+	<string name="undo">Undo</string>
+	<string name="categoryDeleted">Category Deleted</string>
+	<string name="confirmDeleteTitle">Confirm Delete</string>
+	<string name="confirmDeleteMessage">Are you sure that you want to delete this?</string>
 </resources>

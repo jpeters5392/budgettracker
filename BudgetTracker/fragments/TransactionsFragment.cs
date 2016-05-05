@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Android.Views;
 using Android.OS;
 using Android.Widget;
@@ -12,15 +13,22 @@ namespace BudgetTracker
 {
 	public class TransactionsFragment : Android.App.Fragment
 	{
-		string[] categories = new string[] { "Food", "Utilities", "Vacation" };
+		CategoryService categoryService;
 		View view;
 		Button saveButton;
 		AppCompatSpinner categorySpinner;
 		EditText transactionAmount;
 		LinearLayout transactionLayout;
+		InputUtilities inputUtilities;
 
-		public TransactionsFragment ()
+		public TransactionsFragment() : this(new CategoryService(), new InputUtilities())
 		{
+		}
+
+		public TransactionsFragment (CategoryService categoryService, InputUtilities inputUtilities)
+		{
+			this.categoryService = categoryService;
+			this.inputUtilities = inputUtilities;
 		}
 
 		public override View OnCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -30,17 +38,32 @@ namespace BudgetTracker
 			transactionAmount = view.FindViewById<EditText> (Resource.Id.transactionAmount);
 			transactionLayout = view.FindViewById<LinearLayout> (Resource.Id.transactionLayout);
 
-			categorySpinner = view.FindViewById<AppCompatSpinner> (Resource.Id.categorySpinner);
-			var categoriesAdapter = new ArrayAdapter<string> (this.Activity, Resource.Layout.support_simple_spinner_dropdown_item, categories);
-			categorySpinner.Adapter = categoriesAdapter;
+			this.categorySpinner = view.FindViewById<AppCompatSpinner> (Resource.Id.categorySpinner);
+			var categories = this.categoryService.RetrieveCategories ();
+			var categoryNames = categories.Select (x => x.Name).ToArray();
+			var categoriesAdapter = new ArrayAdapter<string> (this.Activity, Resource.Layout.support_simple_spinner_dropdown_item, categoryNames);
+			this.categorySpinner.Adapter = categoriesAdapter;
 
 			saveButton = view.FindViewById<Button> (Resource.Id.saveButton);
+
+			// bind event handlers
 			saveButton.Click += SaveTransaction;
+			this.categorySpinner.Touch += OnSpinnerTouched;
 
 			// set the focus to the transaction amount and activate the keyboard
 			transactionAmount.ClearFocus ();
 
 			return view;
+		}
+
+		protected void OnSpinnerTouched(object sender, EventArgs e)
+		{
+			// This is needed to remove the focus from the edit text boxes, and then focus and select the spinner
+			Spinner spinner = (Spinner)sender;
+			this.transactionAmount.ClearFocus ();
+			this.inputUtilities.HideKeyboard (this.view);
+			spinner.RequestFocusFromTouch ();
+			spinner.PerformClick ();
 		}
 
 		public override void OnDestroyView ()
@@ -56,9 +79,10 @@ namespace BudgetTracker
 				transactionAmount = null;
 			}
 
-			if (categorySpinner != null) {
-				categorySpinner.Dispose ();
-				categorySpinner = null;
+			if (this.categorySpinner != null) {
+				this.categorySpinner.Touch -= OnSpinnerTouched;
+				this.categorySpinner.Dispose ();
+				this.categorySpinner = null;
 			}
 
 			if (transactionLayout != null) {
@@ -93,8 +117,7 @@ namespace BudgetTracker
 
 		private void ClearFocusAndHideKeyboard()
 		{
-			InputMethodManager imm = (InputMethodManager)this.Activity.GetSystemService(Context.InputMethodService);
-			imm.HideSoftInputFromWindow(view.ApplicationWindowToken, HideSoftInputFlags.NotAlways);
+			this.inputUtilities.HideKeyboard (this.view);
 			transactionAmount.ClearFocus ();
 			transactionLayout.RequestFocus ();
 		}

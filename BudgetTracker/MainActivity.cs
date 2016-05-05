@@ -17,8 +17,10 @@ namespace BudgetTracker
 		DrawerLayout drawerLayout;
 		NavigationView navigationView;
 
-		Fragment[] fragments = new Fragment[] { new TransactionsFragment(), new CategoriesFragment(), new ReportsFragment() };
 		int[] titleResources = new int[] { Resource.String.transactions, Resource.String.categories, Resource.String.reports };
+
+		int currentNavigationItem = 0;
+		private const string SelectedNavigationIndex = "SelectedNavigationIndex";
 
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
@@ -43,20 +45,24 @@ namespace BudgetTracker
 			navigationView.NavigationItemSelected += NavigateToItem;
 
 			// set the transactions fragment to be displayed by default
-			this.SetFragment (0);
+			if (savedInstanceState != null) {
+				// we just need to set the title, but not the fragment
+				this.currentNavigationItem = savedInstanceState.GetInt(SelectedNavigationIndex);
+				this.Title = this.GetString(this.titleResources [this.currentNavigationItem]);
+			} else {
+				this.SetFragment (new TransactionsFragment (new CategoryService (), new InputUtilities ()), 0);
+			}
+		}
+
+		protected override void OnSaveInstanceState (Bundle outState)
+		{
+			base.OnSaveInstanceState (outState);
+
+			outState.PutInt (SelectedNavigationIndex, this.currentNavigationItem); 
 		}
 
 		protected override void OnDestroy ()
 		{
-			if (this.fragments != null) {
-				foreach (var fragment in fragments) {
-					if (fragment != null) {
-						fragment.Dispose ();
-					}
-				}
-				this.fragments = null;
-			}
-
 			if (this.drawerLayout != null) {
 				this.drawerLayout.Dispose ();
 			}
@@ -73,23 +79,26 @@ namespace BudgetTracker
 		{
 			e.MenuItem.SetChecked (true);
 
-			int index = 0;
+			Fragment fragment = null;
 
 			switch (e.MenuItem.ItemId)
 			{
 				case Resource.Id.nav_reports:
-					index = 2;
+					fragment = new ReportsFragment ();
+					this.currentNavigationItem = 2;
 					break;
 				case Resource.Id.nav_categories:
-					index = 1;
+					fragment = new CategoriesFragment (new CategoryService (), new CategoryTypeService (), new InputUtilities ());
+					this.currentNavigationItem = 1;
 					break;
 				case Resource.Id.nav_transactions:
 				default:
-					index = 0;
+					fragment = new TransactionsFragment (new CategoryService (), new InputUtilities ());
+					this.currentNavigationItem = 0;
 					break;
 			}
 
-			this.SetFragment (index);
+			this.SetFragment (fragment, this.currentNavigationItem);
 
 			drawerLayout.CloseDrawers ();
 		}
@@ -118,9 +127,9 @@ namespace BudgetTracker
 			return base.OnOptionsItemSelected(item);
 		}
 
-		private void SetFragment(int index)
+		private void SetFragment(Fragment fragment, int index)
 		{
-			this.FragmentManager.BeginTransaction ().Replace (Resource.Id.frameLayout, this.fragments [index]).Commit ();
+			this.FragmentManager.BeginTransaction ().Replace (Resource.Id.frameLayout, fragment).Commit ();
 			this.Title = this.GetString(this.titleResources [index]);
 		}
 	}

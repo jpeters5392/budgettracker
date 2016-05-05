@@ -15,26 +15,19 @@ namespace BudgetTracker
 		RecyclerView.LayoutManager categoriesLayoutManager;
 		FloatingActionButton fab;
 
-		Category[] categories;
+		CategoryService categoryService;
+		CategoryTypeService categoryTypeService;
+		InputUtilities inputUtilities;
 
-		public CategoriesFragment ()
+		public CategoriesFragment() : this(new CategoryService(), new CategoryTypeService(), new InputUtilities())
 		{
-			Category food = new Category ();
-			food.Name = "Food";
-			food.Description = "Eating out";
-			food.CategoryType = CategoryType.Expense;
-			food.Id = Guid.NewGuid ();
-			Category utilities = new Category ();
-			utilities.Name = "Utilities";
-			utilities.Description = "Cable and Internet";
-			utilities.CategoryType = CategoryType.Expense;
-			utilities.Id = Guid.NewGuid ();
-			Category vacation = new Category ();
-			vacation.Name = "Vacation";
-			vacation.Description = "Travel budget";
-			vacation.CategoryType = CategoryType.Expense;
-			vacation.Id = Guid.NewGuid ();
-			categories = new Category[] { food, utilities, vacation };
+		}
+
+		public CategoriesFragment (CategoryService categoryService, CategoryTypeService categoryTypeService, InputUtilities inputUtilities)
+		{
+			this.categoryService = categoryService;
+			this.categoryTypeService = categoryTypeService;
+			this.inputUtilities = inputUtilities;
 		}
 
 		public override View OnCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -49,7 +42,7 @@ namespace BudgetTracker
 			categoriesLayoutManager = new LinearLayoutManager (this.Activity);
 			categoriesRecyclerView.SetLayoutManager (categoriesLayoutManager);
 
-			categoriesAdapter = new CategoriesAdapter (this.categories);
+			categoriesAdapter = new CategoriesAdapter (this.categoryService, this.categoryTypeService, this.inputUtilities);
 			categoriesRecyclerView.SetAdapter (categoriesAdapter);
 
 			return view;
@@ -63,7 +56,8 @@ namespace BudgetTracker
 
 		public void AddCategory(object sender, EventArgs e) 
 		{
-			Toast.MakeText (this.Activity, "Clicked FAB", ToastLength.Short);
+			var toast = Toast.MakeText (this.Activity, "Clicked FAB", ToastLength.Short);
+			toast.Show ();
 		}
 	}
 }
