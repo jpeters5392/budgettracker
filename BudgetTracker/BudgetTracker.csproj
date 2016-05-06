@@ -72,8 +72,6 @@
     <Compile Include="fragments\ReportsFragment.cs" />
     <Compile Include="adapters\CategoriesAdapter.cs" />
     <Compile Include="viewHolders\CategoryViewHolder.cs" />
-    <Compile Include="models\Category.cs" />
-    <Compile Include="models\CategoryType.cs" />
     <Compile Include="services\CategoryService.cs" />
     <Compile Include="services\CategoryTypeService.cs" />
     <Compile Include="models\IdTag.cs" />
@@ -81,7 +79,6 @@
     <Compile Include="models\ItemDeletedEventArgs.cs" />
     <Compile Include="utilities\SnackbarCallback.cs" />
     <Compile Include="services\TransactionService.cs" />
-    <Compile Include="models\Transaction.cs" />
     <Compile Include="fragments\TransactionEntryFragment.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -132,6 +129,7 @@
     <Folder Include="services\" />
     <Folder Include="utilities\" />
   </ItemGroup>
+  <Import Project="..\Shared\Shared.projitems" Label="Shared" Condition="Exists('..\Shared\Shared.projitems')" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Import Project="..\packages\Xamarin.Android.Support.Vector.Drawable.23.3.0\build\Xamarin.Android.Support.Vector.Drawable.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Vector.Drawable.23.3.0\build\Xamarin.Android.Support.Vector.Drawable.targets')" />
   <ItemGroup>
