@@ -39,6 +39,7 @@
                 android:singleLine="true"
                 android:nextFocusForward="@+id/categorySpinner"
                 android:nextFocusRight="@+id/categorySpinner"
+                android:nextFocusDown="@+id/categorySpinner"
                 android:nextFocusLeft="@+id/transactionVendor"
                 android:hint="@string/transactionAmountHint" />
         </android.support.design.widget.TextInputLayout>
@@ -49,6 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:nextFocusForward="@+id/transactionDescription"
+            android:nextFocusDown="@+id/transactionDescription"
             android:nextFocusRight="@+id/transactionDescription"
             android:nextFocusLeft="@+id/transactionAmount"
             android:prompt="@string/category_prompt" />
@@ -63,8 +65,10 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:nextFocusForward="@+id/saveButton"
+            android:nextFocusDown="@+id/saveButton"
             android:nextFocusRight="@+id/saveButton"
             android:nextFocusLeft="@+id/categorySpinner"
+            android:nextFocusUp="@+id/categorySpinner"
             android:hint="@string/description" />
     </android.support.design.widget.TextInputLayout>
     <Button

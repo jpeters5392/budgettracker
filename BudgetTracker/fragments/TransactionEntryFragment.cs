@@ -122,9 +122,13 @@ namespace BudgetTracker
 
 		public void SaveTransaction(object sender, EventArgs e)
 		{
-			decimal amount = 0;
+			// hide the keyboard
+			ClearFocusAndHideKeyboard ();
 
-			if (this.ValidateVendor() && this.ValidateAmount(out amount)) {
+			decimal amount = 0;
+			bool[] validations = new bool[] { this.ValidateVendor (), this.ValidateAmount (out amount) };
+
+			if (validations.All(x => x)) {
 				var selectedCategory = this.categoryService.RetrieveCategoryByName (this.categorySpinner.SelectedItem.ToString ());
 				Transaction transaction = new Transaction ();
 				transaction.CategoryId = selectedCategory.Id;
@@ -140,9 +144,6 @@ namespace BudgetTracker
 
 				// reset the form
 				this.ResetFields();
-
-				// hide the keyboard
-				ClearFocusAndHideKeyboard ();
 			}
 		}
 
