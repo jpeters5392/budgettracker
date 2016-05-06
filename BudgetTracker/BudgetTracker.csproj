@@ -68,7 +68,6 @@
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="fragments\TransactionsFragment.cs" />
     <Compile Include="fragments\CategoriesFragment.cs" />
     <Compile Include="fragments\ReportsFragment.cs" />
     <Compile Include="adapters\CategoriesAdapter.cs" />
@@ -81,6 +80,9 @@
     <Compile Include="utilities\InputUtilities.cs" />
     <Compile Include="models\ItemDeletedEventArgs.cs" />
     <Compile Include="utilities\SnackbarCallback.cs" />
+    <Compile Include="services\TransactionService.cs" />
+    <Compile Include="models\Transaction.cs" />
+    <Compile Include="fragments\TransactionEntryFragment.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
@@ -96,7 +98,6 @@
     <AndroidResource Include="Resources\mipmap-xhdpi\Icon.png" />
     <AndroidResource Include="Resources\mipmap-xxhdpi\Icon.png" />
     <AndroidResource Include="Resources\mipmap-xxxhdpi\Icon.png" />
-    <AndroidResource Include="Resources\layout\Transactions.axml" />
     <AndroidResource Include="Resources\layout\NavigationDrawerListView.axml" />
     <AndroidResource Include="Resources\layout\Categories.axml" />
     <AndroidResource Include="Resources\layout\Reports.axml" />
@@ -119,6 +120,7 @@
     <AndroidResource Include="Resources\drawable-xxxhdpi\ic_add_white.png" />
     <AndroidResource Include="Resources\values\ids.xml" />
     <AndroidResource Include="Resources\values\dimens.xml" />
+    <AndroidResource Include="Resources\layout\TransactionEntry.axml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\drawable\" />

@@ -9,15 +9,12 @@ namespace BudgetTracker
 {
 	public class CategoriesFragment : Android.App.Fragment
 	{
-		private const string TAG = "CategoriesFragment";
-		RecyclerView categoriesRecyclerView;
-		RecyclerView.Adapter categoriesAdapter;
-		RecyclerView.LayoutManager categoriesLayoutManager;
-		FloatingActionButton fab;
+		private RecyclerView categoriesRecyclerView;
+		private FloatingActionButton fab;
 
-		CategoryService categoryService;
-		CategoryTypeService categoryTypeService;
-		InputUtilities inputUtilities;
+		private CategoryService categoryService;
+		private CategoryTypeService categoryTypeService;
+		private InputUtilities inputUtilities;
 
 		public CategoriesFragment() : this(new CategoryService(), new CategoryTypeService(), new InputUtilities())
 		{
@@ -33,16 +30,15 @@ namespace BudgetTracker
 		public override View OnCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			var view = inflater.Inflate (Resource.Layout.Categories, container, false);
-			view.SetTag (view.Id, TAG);
 
 			fab = view.FindViewById<FloatingActionButton> (Resource.Id.fab);
 			fab.Click += AddCategory;
 
 			categoriesRecyclerView = view.FindViewById<RecyclerView> (Resource.Id.categoriesRecyclerView);
-			categoriesLayoutManager = new LinearLayoutManager (this.Activity);
+			RecyclerView.LayoutManager categoriesLayoutManager = new LinearLayoutManager (this.Activity);
 			categoriesRecyclerView.SetLayoutManager (categoriesLayoutManager);
 
-			categoriesAdapter = new CategoriesAdapter (this.categoryService, this.categoryTypeService, this.inputUtilities);
+			RecyclerView.Adapter categoriesAdapter = new CategoriesAdapter (this.categoryService, this.categoryTypeService, this.inputUtilities);
 			categoriesRecyclerView.SetAdapter (categoriesAdapter);
 
 			return view;
@@ -50,7 +46,17 @@ namespace BudgetTracker
 
 		public override void OnDestroyView ()
 		{
-			fab.Click -= AddCategory;
+			if (this.fab != null) {
+				this.fab.Click -= AddCategory;
+				this.fab.Dispose ();
+				this.fab = null;
+			}
+
+			if (this.categoriesRecyclerView != null) {
+				this.categoriesRecyclerView.Dispose ();
+				this.categoriesRecyclerView = null;
+			}
+
 			base.OnDestroyView ();
 		}
 
@@ -61,4 +67,3 @@ namespace BudgetTracker
 		}
 	}
 }
-

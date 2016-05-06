@@ -1951,8 +1951,8 @@ namespace BudgetTracker
 			// aapt resource value: 0x7f07001f
 			public const int always = 2131165215;
 			
-			// aapt resource value: 0x7f070097
-			public const int amountInputLayout = 2131165335;
+			// aapt resource value: 0x7f07009b
+			public const int amountInputLayout = 2131165339;
 			
 			// aapt resource value: 0x7f07001c
 			public const int beginning = 2131165212;
@@ -1987,8 +1987,8 @@ namespace BudgetTracker
 			// aapt resource value: 0x7f07006e
 			public const int categoryNameLayout = 2131165294;
 			
-			// aapt resource value: 0x7f070099
-			public const int categorySpinner = 2131165337;
+			// aapt resource value: 0x7f07009c
+			public const int categorySpinner = 2131165340;
 			
 			// aapt resource value: 0x7f070077
 			public const int categoryType = 2131165303;
@@ -2034,6 +2034,9 @@ namespace BudgetTracker
 			
 			// aapt resource value: 0x7f07007a
 			public const int deleteCategory = 2131165306;
+			
+			// aapt resource value: 0x7f07009e
+			public const int descriptionInputLayout = 2131165342;
 			
 			// aapt resource value: 0x7f07007c
 			public const int design_bottom_sheet = 2131165308;
@@ -2167,14 +2170,14 @@ namespace BudgetTracker
 			// aapt resource value: 0x7f070017
 			public const int multiply = 2131165207;
 			
-			// aapt resource value: 0x7f07009c
-			public const int nav_categories = 2131165340;
+			// aapt resource value: 0x7f0700a1
+			public const int nav_categories = 2131165345;
 			
-			// aapt resource value: 0x7f07009d
-			public const int nav_reports = 2131165341;
+			// aapt resource value: 0x7f0700a2
+			public const int nav_reports = 2131165346;
 			
-			// aapt resource value: 0x7f07009b
-			public const int nav_transactions = 2131165339;
+			// aapt resource value: 0x7f0700a0
+			public const int nav_transactions = 2131165344;
 			
 			// aapt resource value: 0x7f070087
 			public const int nav_view = 2131165319;
@@ -2209,11 +2212,14 @@ namespace BudgetTracker
 			// aapt resource value: 0x7f070055
 			public const int radio = 2131165269;
 			
+			// aapt resource value: 0x7f070096
+			public const int reportLayout = 2131165334;
+			
 			// aapt resource value: 0x7f070031
 			public const int right = 2131165233;
 			
-			// aapt resource value: 0x7f07009a
-			public const int saveButton = 2131165338;
+			// aapt resource value: 0x7f07009f
+			public const int saveButton = 2131165343;
 			
 			// aapt resource value: 0x7f070073
 			public const int saveCategory = 2131165299;
@@ -2347,17 +2353,26 @@ namespace BudgetTracker
 			// aapt resource value: 0x7f07007b
 			public const int touch_outside = 2131165307;
 			
-			// aapt resource value: 0x7f070098
-			public const int transactionAmount = 2131165336;
+			// aapt resource value: 0x7f07009a
+			public const int transactionAmount = 2131165338;
 			
-			// aapt resource value: 0x7f070096
-			public const int transactionLayout = 2131165334;
+			// aapt resource value: 0x7f07009d
+			public const int transactionDescription = 2131165341;
+			
+			// aapt resource value: 0x7f070097
+			public const int transactionLayout = 2131165335;
+			
+			// aapt resource value: 0x7f070099
+			public const int transactionVendor = 2131165337;
 			
 			// aapt resource value: 0x7f070009
 			public const int up = 2131165193;
 			
 			// aapt resource value: 0x7f070015
 			public const int useLogo = 2131165205;
+			
+			// aapt resource value: 0x7f070098
+			public const int vendorInputLayout = 2131165336;
 			
 			// aapt resource value: 0x7f07000a
 			public const int view_offset_helper = 2131165194;
@@ -2587,7 +2602,7 @@ namespace BudgetTracker
 			public const int Toolbar = 2130968631;
 			
 			// aapt resource value: 0x7f040038
-			public const int Transactions = 2130968632;
+			public const int TransactionEntry = 2130968632;
 			
 			static Layout()
 			{
@@ -2709,14 +2724,14 @@ namespace BudgetTracker
 			// aapt resource value: 0x7f0a0015
 			public const int bottom_sheet_behavior = 2131361813;
 			
-			// aapt resource value: 0x7f0a0026
-			public const int cancel = 2131361830;
+			// aapt resource value: 0x7f0a0029
+			public const int cancel = 2131361833;
 			
-			// aapt resource value: 0x7f0a0021
-			public const int categories = 2131361825;
+			// aapt resource value: 0x7f0a0024
+			public const int categories = 2131361828;
 			
-			// aapt resource value: 0x7f0a002c
-			public const int categoryDeleted = 2131361836;
+			// aapt resource value: 0x7f0a002f
+			public const int categoryDeleted = 2131361839;
 			
 			// aapt resource value: 0x7f0a001b
 			public const int category_prompt = 2131361819;
@@ -2724,56 +2739,65 @@ namespace BudgetTracker
 			// aapt resource value: 0x7f0a0016
 			public const int character_counter_pattern = 2131361814;
 			
-			// aapt resource value: 0x7f0a0024
-			public const int clear = 2131361828;
-			
-			// aapt resource value: 0x7f0a002e
-			public const int confirmDeleteMessage = 2131361838;
-			
-			// aapt resource value: 0x7f0a002d
-			public const int confirmDeleteTitle = 2131361837;
-			
-			// aapt resource value: 0x7f0a0025
-			public const int delete = 2131361829;
-			
-			// aapt resource value: 0x7f0a0029
-			public const int description = 2131361833;
-			
 			// aapt resource value: 0x7f0a0027
-			public const int edit = 2131361831;
+			public const int clear = 2131361831;
+			
+			// aapt resource value: 0x7f0a0031
+			public const int confirmDeleteMessage = 2131361841;
+			
+			// aapt resource value: 0x7f0a0030
+			public const int confirmDeleteTitle = 2131361840;
+			
+			// aapt resource value: 0x7f0a0028
+			public const int delete = 2131361832;
+			
+			// aapt resource value: 0x7f0a002c
+			public const int description = 2131361836;
+			
+			// aapt resource value: 0x7f0a002a
+			public const int edit = 2131361834;
 			
 			// aapt resource value: 0x7f0a0017
 			public const int hello = 2131361815;
 			
-			// aapt resource value: 0x7f0a002a
-			public const int name = 2131361834;
+			// aapt resource value: 0x7f0a002d
+			public const int name = 2131361837;
 			
-			// aapt resource value: 0x7f0a0023
-			public const int navigationHeader = 2131361827;
+			// aapt resource value: 0x7f0a0026
+			public const int navigationHeader = 2131361830;
 			
-			// aapt resource value: 0x7f0a0022
-			public const int reports = 2131361826;
+			// aapt resource value: 0x7f0a0025
+			public const int reports = 2131361829;
 			
-			// aapt resource value: 0x7f0a0028
-			public const int save = 2131361832;
+			// aapt resource value: 0x7f0a002b
+			public const int save = 2131361835;
 			
-			// aapt resource value: 0x7f0a001f
-			public const int saveTransaction = 2131361823;
+			// aapt resource value: 0x7f0a0021
+			public const int saveTransaction = 2131361825;
 			
 			// aapt resource value: 0x7f0a0013
 			public const int status_bar_notification_info_overflow = 2131361811;
 			
 			// aapt resource value: 0x7f0a001d
-			public const int transactionHint = 2131361821;
+			public const int transactionAmountHint = 2131361821;
+			
+			// aapt resource value: 0x7f0a0023
+			public const int transactionEntry = 2131361827;
+			
+			// aapt resource value: 0x7f0a001f
+			public const int transactionIncorrectFormat = 2131361823;
 			
 			// aapt resource value: 0x7f0a001e
-			public const int transactionIncorrectFormat = 2131361822;
+			public const int transactionVendorHint = 2131361822;
+			
+			// aapt resource value: 0x7f0a0022
+			public const int transactions = 2131361826;
+			
+			// aapt resource value: 0x7f0a002e
+			public const int undo = 2131361838;
 			
 			// aapt resource value: 0x7f0a0020
-			public const int transactions = 2131361824;
-			
-			// aapt resource value: 0x7f0a002b
-			public const int undo = 2131361835;
+			public const int vendorRequired = 2131361824;
 			
 			static String()
 			{

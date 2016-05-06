@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace BudgetTracker
@@ -43,12 +44,16 @@ namespace BudgetTracker
 			return categories;
 		}
 
+		public Category RetrieveCategoryByName(string name) {
+			return categories.Where (x => x.Name == name).FirstOrDefault ();
+		}
+
 		public void Delete(int position) {
 			categories.RemoveAt (position);
 		}
 
 		public void Insert(Category category) {
-			if (category.Id == Guid.Empty ()) {
+			if (category.Id == Guid.Empty) {
 				category.Id = Guid.NewGuid ();
 			}
 			categories.Add (category);

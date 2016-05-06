@@ -14,12 +14,12 @@ namespace BudgetTracker
 	[Activity (Label = "BudgetTracker", MainLauncher = true, Icon = "@mipmap/icon")]
 	public class MainActivity : AppCompatActivity
 	{
-		DrawerLayout drawerLayout;
-		NavigationView navigationView;
+		private DrawerLayout drawerLayout;
+		private NavigationView navigationView;
 
-		int[] titleResources = new int[] { Resource.String.transactions, Resource.String.categories, Resource.String.reports };
+		private int[] titleResources = new int[] { Resource.String.transactionEntry, Resource.String.categories, Resource.String.reports };
 
-		int currentNavigationItem = 0;
+		private int currentNavigationItem = 0;
 		private const string SelectedNavigationIndex = "SelectedNavigationIndex";
 
 		protected override void OnCreate (Bundle savedInstanceState)
@@ -40,9 +40,9 @@ namespace BudgetTracker
 			SupportActionBar.SetHomeAsUpIndicator (Resource.Drawable.ic_menu_white);
 
 			// get references to items in the view
-			drawerLayout = FindViewById<DrawerLayout> (Resource.Id.drawerLayout);
-			navigationView = FindViewById<NavigationView> (Resource.Id.nav_view);
-			navigationView.NavigationItemSelected += NavigateToItem;
+			this.drawerLayout = FindViewById<DrawerLayout> (Resource.Id.drawerLayout);
+			this.navigationView = FindViewById<NavigationView> (Resource.Id.nav_view);
+			this.navigationView.NavigationItemSelected += this.NavigateToItem;
 
 			// set the transactions fragment to be displayed by default
 			if (savedInstanceState != null) {
@@ -50,7 +50,7 @@ namespace BudgetTracker
 				this.currentNavigationItem = savedInstanceState.GetInt(SelectedNavigationIndex);
 				this.Title = this.GetString(this.titleResources [this.currentNavigationItem]);
 			} else {
-				this.SetFragment (new TransactionsFragment (new CategoryService (), new InputUtilities ()), 0);
+				this.SetFragment (new TransactionEntryFragment (new TransactionService(), new CategoryService (), new InputUtilities ()), 0);
 			}
 		}
 
@@ -68,7 +68,7 @@ namespace BudgetTracker
 			}
 
 			if (this.navigationView != null) {
-				navigationView.NavigationItemSelected -= NavigateToItem;
+				this.navigationView.NavigationItemSelected -= this.NavigateToItem;
 				this.navigationView.Dispose ();
 			}
 
@@ -84,7 +84,7 @@ namespace BudgetTracker
 			switch (e.MenuItem.ItemId)
 			{
 				case Resource.Id.nav_reports:
-					fragment = new ReportsFragment ();
+					fragment = new ReportsFragment (new TransactionService(), new CategoryService ());
 					this.currentNavigationItem = 2;
 					break;
 				case Resource.Id.nav_categories:
@@ -93,7 +93,7 @@ namespace BudgetTracker
 					break;
 				case Resource.Id.nav_transactions:
 				default:
-					fragment = new TransactionsFragment (new CategoryService (), new InputUtilities ());
+					fragment = new TransactionEntryFragment (new TransactionService(), new CategoryService (), new InputUtilities ());
 					this.currentNavigationItem = 0;
 					break;
 			}
@@ -112,13 +112,13 @@ namespace BudgetTracker
 			switch (item.ItemId)
 			{
 			case Android.Resource.Id.Home:
-				if (drawerLayout.IsDrawerOpen (GravityCompat.Start)) 
+				if (this.drawerLayout.IsDrawerOpen (GravityCompat.Start)) 
 				{
-					drawerLayout.CloseDrawer (GravityCompat.Start);
+					this.drawerLayout.CloseDrawer (GravityCompat.Start);
 				} 
 				else 
 				{
-					drawerLayout.OpenDrawer (GravityCompat.Start);
+					this.drawerLayout.OpenDrawer (GravityCompat.Start);
 				}
 
 				return true;

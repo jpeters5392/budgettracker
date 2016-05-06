@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/transactionLayout"
+    android:orientation="vertical"
+    android:paddingTop="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusableInTouchMode="true">
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/vendorInputLayout">
+        <EditText
+            android:id="@+id/transactionVendor"
+            android:layout_gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:nextFocusForward="@+id/transactionAmount"
+            android:nextFocusRight="@+id/transactionAmount"
+            android:hint="@string/transactionVendorHint" />
+    </android.support.design.widget.TextInputLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="0dp">
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/amountInputLayout">
+            <EditText
+                android:id="@+id/transactionAmount"
+                android:inputType="number|numberDecimal"
+                android:layout_gravity="left"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:nextFocusForward="@+id/categorySpinner"
+                android:nextFocusRight="@+id/categorySpinner"
+                android:nextFocusLeft="@+id/transactionVendor"
+                android:hint="@string/transactionAmountHint" />
+        </android.support.design.widget.TextInputLayout>
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/categorySpinner"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:nextFocusForward="@+id/transactionDescription"
+            android:nextFocusRight="@+id/transactionDescription"
+            android:nextFocusLeft="@+id/transactionAmount"
+            android:prompt="@string/category_prompt" />
+    </LinearLayout>
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/descriptionInputLayout">
+        <EditText
+            android:id="@+id/transactionDescription"
+            android:layout_gravity="center"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:nextFocusForward="@+id/saveButton"
+            android:nextFocusRight="@+id/saveButton"
+            android:nextFocusLeft="@+id/categorySpinner"
+            android:hint="@string/description" />
+    </android.support.design.widget.TextInputLayout>
+    <Button
+        android:id="@+id/saveButton"
+        android:text="@string/saveTransaction"
+        android:layout_width="match_parent"
+        android:nextFocusLeft="@+id/transactionDescription"
+        android:layout_height="wrap_content" />
+</LinearLayout>

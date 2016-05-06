@@ -10,12 +10,12 @@ namespace BudgetTracker
 {
 	public class CategoriesAdapter : RecyclerView.Adapter
 	{
-		IList<Category> items;
-		InputUtilities inputUtilities;
-		CategoryType[] categoryTypes;
-		string[] categoryTypeNames;
-		RecyclerView recyclerView;
-		CategoryService dataService;
+		private IList<Category> items;
+		private InputUtilities inputUtilities;
+		private CategoryType[] categoryTypes;
+		private string[] categoryTypeNames;
+		private RecyclerView recyclerView;
+		private CategoryService dataService;
 
 		public CategoriesAdapter (CategoryService dataService, CategoryTypeService categoryTypeService, InputUtilities inputUtilities)
 		{
@@ -92,25 +92,32 @@ namespace BudgetTracker
 
 			// create a snackbar to allow them to undo the action
 			var snackbar = Snackbar.Make (e.View, Resource.String.categoryDeleted, Snackbar.LengthLong);
+
+			// this callback isn't actually necessary for our case, but I included it to show how you can trigger events when the snackbar goes away
 			SnackbarCallback snackbarCallback = new SnackbarCallback ();
 			snackbarCallback.DismissedAction = new Action<Snackbar, int>((sbar, reason) => {
-				// this method is fired if they click the Undo button, so check the reason code
+				// this method is also fired if they click the Undo button, so check the reason code
 				if (reason == Snackbar.Callback.DismissEventManual ||
 					reason == Snackbar.Callback.DismissEventSwipe ||
 					reason == Snackbar.Callback.DismissEventTimeout ||
 					reason == Snackbar.Callback.DismissEventConsecutive) {
-					// permanently delete the item here
-					Toast.MakeText (e.View.Context, "Item permanently deleted", ToastLength.Short).Show ();
+					// cleanup
 					e = null;
 					sbar = null;
 				}
 			});
 			snackbar.SetAction (Resource.String.undo, (v) => {
-				// add the item back to the list
+				// they clicked Undo, so add the item back to the list
 				this.items.Insert(e.AdapterPosition, item);
 				this.NotifyItemInserted(e.AdapterPosition);
+
+				// scroll to the item
 				this.recyclerView.ScrollToPosition(e.AdapterPosition);
+
+				// let them know it was restored
 				Toast.MakeText (v.Context, "Item restored", ToastLength.Short).Show ();
+
+				// cleanup
 				e = null;
 				v = null;
 				item = null;
