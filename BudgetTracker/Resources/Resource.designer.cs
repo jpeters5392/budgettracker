@@ -2059,8 +2059,8 @@ namespace BudgetTracker
 			// aapt resource value: 0x7f070075
 			public const int displayHolder = 2131165301;
 			
-			// aapt resource value: 0x7f070085
-			public const int drawerLayout = 2131165317;
+			// aapt resource value: 0x7f070084
+			public const int drawerLayout = 2131165316;
 			
 			// aapt resource value: 0x7f070079
 			public const int editCategory = 2131165305;
@@ -2341,8 +2341,8 @@ namespace BudgetTracker
 			// aapt resource value: 0x7f070049
 			public const int title_template = 2131165257;
 			
-			// aapt resource value: 0x7f070084
-			public const int toolbar = 2131165316;
+			// aapt resource value: 0x7f070085
+			public const int toolbar = 2131165317;
 			
 			// aapt resource value: 0x7f070033
 			public const int top = 2131165235;

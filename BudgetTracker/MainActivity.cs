@@ -21,6 +21,7 @@ namespace BudgetTracker
 
 		private int currentNavigationItem = 0;
 		private const string SelectedNavigationIndex = "SelectedNavigationIndex";
+		private InputUtilities inputUtilities;
 
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
@@ -43,6 +44,7 @@ namespace BudgetTracker
 			this.drawerLayout = FindViewById<DrawerLayout> (Resource.Id.drawerLayout);
 			this.navigationView = FindViewById<NavigationView> (Resource.Id.nav_view);
 			this.navigationView.NavigationItemSelected += this.NavigateToItem;
+			this.inputUtilities = new InputUtilities ();
 
 			// set the transactions fragment to be displayed by default
 			if (savedInstanceState != null) {
@@ -50,7 +52,7 @@ namespace BudgetTracker
 				this.currentNavigationItem = savedInstanceState.GetInt(SelectedNavigationIndex);
 				this.Title = this.GetString(this.titleResources [this.currentNavigationItem]);
 			} else {
-				this.SetFragment (new TransactionEntryFragment (new TransactionService(), new CategoryService (), new InputUtilities ()), 0);
+				this.SetFragment (new TransactionEntryFragment (new TransactionService(), new CategoryService (), this.inputUtilities), 0);
 			}
 		}
 
@@ -88,12 +90,12 @@ namespace BudgetTracker
 					this.currentNavigationItem = 2;
 					break;
 				case Resource.Id.nav_categories:
-					fragment = new CategoriesFragment (new CategoryService (), new CategoryTypeService (), new InputUtilities ());
+				fragment = new CategoriesFragment (new CategoryService (), new CategoryTypeService (), this.inputUtilities);
 					this.currentNavigationItem = 1;
 					break;
 				case Resource.Id.nav_transactions:
 				default:
-					fragment = new TransactionEntryFragment (new TransactionService(), new CategoryService (), new InputUtilities ());
+				fragment = new TransactionEntryFragment (new TransactionService(), new CategoryService (), this.inputUtilities);
 					this.currentNavigationItem = 0;
 					break;
 			}
@@ -105,6 +107,8 @@ namespace BudgetTracker
 
 		public override bool OnOptionsItemSelected(IMenuItem item)
 		{
+			this.inputUtilities.HideKeyboard (this.drawerLayout);
+
 			//
 			// Other cases go here for other buttons in the ActionBar.
 			// This sample app has no other buttons. This code is a placeholder to show what would be needed if there were other buttons.

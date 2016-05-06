@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         card_view:cardCornerRadius="0dp"
-        card_view:cardElevation="10dp"
+        card_view:cardElevation="6dp"
         android:padding="8dp">
     <!-- The edit view -->
         <LinearLayout
