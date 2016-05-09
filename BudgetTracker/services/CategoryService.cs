@@ -41,7 +41,8 @@ namespace BudgetTracker
 		}
 
 		public IList<Category> RetrieveCategories() {
-			return categories;
+			// TODO: since I am using a static list, I need to clone it so that deletions to the consumed list do not affect this list
+			return this.CloneList (categories);
 		}
 
 		public Category RetrieveCategoryByName(string name) {
@@ -57,6 +58,25 @@ namespace BudgetTracker
 				category.Id = Guid.NewGuid ();
 			}
 			categories.Add (category);
+		}
+
+		public IList<Category> CloneList(IList<Category> categoryList)
+		{
+			IList<Category> clonedList = new List<Category> ();
+			if (categoryList == null) {
+				return null;
+			}
+
+			foreach (var category in categoryList) {
+				Category newCategory = new Category ();
+				newCategory.CategoryType = category.CategoryType;
+				newCategory.Description = category.Description;
+				newCategory.Id = category.Id;
+				newCategory.Name = category.Name;
+				clonedList.Add (newCategory);
+			}
+
+			return clonedList;
 		}
 	}
 }

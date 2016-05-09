@@ -15,12 +15,12 @@ namespace BudgetTracker
 		private CategoryType[] categoryTypes;
 		private string[] categoryTypeNames;
 		private RecyclerView recyclerView;
-		private CategoryService dataService;
+		private CategoryService categoryService;
 
 		public CategoriesAdapter (CategoryService dataService, CategoryTypeService categoryTypeService, InputUtilities inputUtilities)
 		{
-			this.dataService = dataService;
-			this.items = this.dataService.RetrieveCategories ();
+			this.categoryService = dataService;
+			this.items = this.categoryService.RetrieveCategories ();
 			this.categoryTypes = categoryTypeService.RetrieveCategoryTypes ();
 			this.categoryTypeNames = this.categoryTypes.Select (x => Enum.GetName(typeof(CategoryType), x)).ToArray();
 			this.inputUtilities = inputUtilities;
@@ -101,6 +101,10 @@ namespace BudgetTracker
 					reason == Snackbar.Callback.DismissEventSwipe ||
 					reason == Snackbar.Callback.DismissEventTimeout ||
 					reason == Snackbar.Callback.DismissEventConsecutive) {
+
+					// permanently delete the item
+					this.categoryService.Delete(e.AdapterPosition);
+
 					// cleanup
 					e = null;
 					sbar = null;
