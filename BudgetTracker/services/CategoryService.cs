@@ -60,7 +60,7 @@ namespace BudgetTracker
 			categories.Add (category);
 		}
 
-		public IList<Category> CloneList(IList<Category> categoryList)
+		private IList<Category> CloneList(IList<Category> categoryList)
 		{
 			IList<Category> clonedList = new List<Category> ();
 			if (categoryList == null) {
