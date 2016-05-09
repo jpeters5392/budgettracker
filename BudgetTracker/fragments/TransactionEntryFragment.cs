@@ -5,9 +5,6 @@ using Android.OS;
 using Android.Widget;
 using Android.Support.V7.Widget;
 using Android.Support.Design.Widget;
-using Android.Graphics;
-using Android.Views.InputMethods;
-using Android.Content;
 using SharedPCL;
 using System.Collections.Generic;
 
@@ -29,7 +26,7 @@ namespace BudgetTracker
 		private TextInputLayout vendorInputLayout;
 		private ArrayAdapter categoriesAdapter;
 		private IEnumerable<Category> categories;
-		private string[] categoryNames;
+		private IList<string> categoryNames;
 
 		public TransactionEntryFragment (TransactionService transactionService, ICategoryService categoryService, InputUtilities inputUtilities)
 		{
@@ -51,7 +48,7 @@ namespace BudgetTracker
 
 			this.categorySpinner = view.FindViewById<AppCompatSpinner> (Resource.Id.categorySpinner);
 			this.categories = new List<Category>();
-			this.categoryNames = categories.Select (x => x.Name).ToArray();
+			this.categoryNames = categories.Select (x => x.Name).ToList();
 			this.categoriesAdapter = new ArrayAdapter<string> (this.Activity, Resource.Layout.support_simple_spinner_dropdown_item, this.categoryNames);
 			this.categorySpinner.Adapter = categoriesAdapter;
 
@@ -69,22 +66,19 @@ namespace BudgetTracker
 
 		public async override void OnResume()
 		{
+			//HACK: since we are overriding base methods, we cannot change the lifecycle events to return Tasks.
+			// OnResume is the last lifecycle event so we have to put our async logic here so that there is nothing
+			// after this that is expecting to run.
 			base.OnResume();
 
 			await this.categoryService.InitializeService();
 
 			this.categories = await this.categoryService.RetrieveCategories();
-			this.categoryNames = categories.Select(x => x.Name).ToArray();
+			this.categoryNames = categories.Select(x => x.Name).ToList();
+			this.categoriesAdapter = new ArrayAdapter<string>(this.Activity, Resource.Layout.support_simple_spinner_dropdown_item, this.categoryNames);
 
-			UpdateAdapter();
-		}
-
-		public void UpdateAdapter()
-		{
-			if (this.categoriesAdapter != null)
-			{
-				this.categoriesAdapter.NotifyDataSetChanged();
-			}
+			// run this on the UI thread so that it can be updated
+			this.Activity.RunOnUiThread(() => this.categorySpinner.Adapter = categoriesAdapter);
 		}
 
 		protected void OnSpinnerTouched(object sender, EventArgs e)
@@ -138,6 +132,9 @@ namespace BudgetTracker
 				this.view = null;
 			}
 
+			this.categoryNames = null;
+			this.categories = null;
+
 			base.OnDestroyView ();
 		}
 
@@ -147,11 +144,11 @@ namespace BudgetTracker
 			ClearFocusAndHideKeyboard ();
 
 			decimal amount = 0;
-			bool[] validations = new bool[] { this.ValidateVendor (), this.ValidateAmount (out amount) };
+			var validations = new bool[] { this.ValidateVendor (), this.ValidateAmount (out amount) };
 
 			if (validations.All(x => x)) {
 				var selectedCategory = await this.categoryService.RetrieveCategoryByName (this.categorySpinner.SelectedItem.ToString ());
-				Transaction transaction = new Transaction ();
+				var transaction = new Transaction ();
 				transaction.CategoryId = selectedCategory.Id;
 				transaction.Id = Guid.NewGuid ();
 				transaction.Amount = amount;

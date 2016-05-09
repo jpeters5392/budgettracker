@@ -11,20 +11,32 @@ namespace BudgetTracker
 {
 	public class CategoriesAdapter : RecyclerView.Adapter
 	{
-		private IList<Category> items;
+		private IList<Category> categories;
 		private InputUtilities inputUtilities;
 		private CategoryType[] categoryTypes;
 		private string[] categoryTypeNames;
 		private RecyclerView recyclerView;
-		private ICategoryService categoryService;
+		private readonly ICategoryService categoryService;
 
-		public CategoriesAdapter (IEnumerable<Category> categories, ICategoryService dataService, CategoryTypeService categoryTypeService, InputUtilities inputUtilities)
+		public CategoriesAdapter (ICategoryService dataService, CategoryTypeService categoryTypeService, InputUtilities inputUtilities)
 		{
-			this.items = categories.ToList();
+			this.categories = categories.ToList();
 			this.categoryService = dataService;
 			this.categoryTypes = categoryTypeService.RetrieveCategoryTypes ();
 			this.categoryTypeNames = this.categoryTypes.Select (x => Enum.GetName(typeof(CategoryType), x)).ToArray();
 			this.inputUtilities = inputUtilities;
+		}
+
+		public IList<Category> Categories
+		{
+			get
+			{
+				return this.categories;
+			}
+			set
+			{
+				this.categories = value;
+			}
 		}
 
 		public override RecyclerView.ViewHolder OnCreateViewHolder (ViewGroup parent, int viewType)
@@ -37,7 +49,7 @@ namespace BudgetTracker
 
 		public override void OnBindViewHolder(RecyclerView.ViewHolder viewHolder, int position)
 		{
-			var item = this.items [position];
+			var item = this.categories [position];
 
 			// Replace the contents of the view with that element
 			var holder = viewHolder as CategoryViewHolder;
@@ -81,21 +93,21 @@ namespace BudgetTracker
 
 		public override int ItemCount {
 			get {
-				return this.items.Count;
+				return this.categories.Count;
 			}
 		}
 
 		public void OnItemDelete(object sender, ItemDeletedEventArgs e)
 		{
-			var item = this.items [e.AdapterPosition];
-			this.items.RemoveAt (e.AdapterPosition);
+			var item = this.categories [e.AdapterPosition];
+			this.categories.RemoveAt (e.AdapterPosition);
 			this.NotifyItemRemoved (e.AdapterPosition);
 
 			// create a snackbar to allow them to undo the action
 			var snackbar = Snackbar.Make (e.View, Resource.String.categoryDeleted, Snackbar.LengthLong);
 
 			// this callback isn't actually necessary for our case, but I included it to show how you can trigger events when the snackbar goes away
-			SnackbarCallback snackbarCallback = new SnackbarCallback ();
+			var snackbarCallback = new SnackbarCallback ();
 			snackbarCallback.DismissedAction = new Action<Snackbar, int>((sbar, reason) => {
 				// this method is also fired if they click the Undo button, so check the reason code
 				if (reason == Snackbar.Callback.DismissEventManual ||
@@ -114,7 +126,7 @@ namespace BudgetTracker
 			});
 			snackbar.SetAction (Resource.String.undo, (v) => {
 				// they clicked Undo, so add the item back to the list
-				this.items.Insert(e.AdapterPosition, item);
+				this.categories.Insert(e.AdapterPosition, item);
 				this.NotifyItemInserted(e.AdapterPosition);
 
 				// scroll to the item

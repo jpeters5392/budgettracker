@@ -5,6 +5,7 @@ using Android.Widget;
 using Android.Support.V7.Widget;
 using Android.Support.Design.Widget;
 using SharedPCL;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
@@ -18,7 +19,7 @@ namespace BudgetTracker
 		private ICategoryService categoryService;
 		private CategoryTypeService categoryTypeService;
 		private InputUtilities inputUtilities;
-		private RecyclerView.Adapter categoriesAdapter;
+		private CategoriesAdapter categoriesAdapter;
 		private IEnumerable<Category> categories;
 
 		public CategoriesFragment (ICategoryService categoryService, CategoryTypeService categoryTypeService, InputUtilities inputUtilities)
@@ -41,7 +42,9 @@ namespace BudgetTracker
 
 			this.categories = new List<Category>();
 
-			this.categoriesAdapter = new CategoriesAdapter (categories, this.categoryService, this.categoryTypeService, this.inputUtilities);
+			this.categoriesAdapter = new CategoriesAdapter (this.categoryService, this.categoryTypeService, this.inputUtilities);
+			this.categoriesAdapter.Categories = this.categories.ToList();
+
 			categoriesRecyclerView.SetAdapter (categoriesAdapter);
 
 			return view;
@@ -49,11 +52,15 @@ namespace BudgetTracker
 
 		public async override void OnResume()
 		{
+			//HACK: since we are overriding base methods, we cannot change the lifecycle events to return Tasks.
+			// OnResume is the last lifecycle event so we have to put our async logic here so that there is nothing
+			// after this that is expecting to run.
 			base.OnResume();
 
 			await this.categoryService.InitializeService();
 
 			this.categories = await this.categoryService.RetrieveCategories();
+			this.categoriesAdapter.Categories = this.categories.ToList();
 			this.UpdateAdapter();
 		}
 
@@ -70,6 +77,14 @@ namespace BudgetTracker
 				this.categoriesRecyclerView = null;
 			}
 
+			this.categories = null;
+
+			if (this.categoriesAdapter != null)
+			{
+				this.categoriesAdapter.Dispose();
+				this.categoriesAdapter = null;
+			}
+
 			base.OnDestroyView ();
 		}
 
@@ -77,7 +92,8 @@ namespace BudgetTracker
 		{
 			if (this.categoriesAdapter != null)
 			{
-				this.categoriesAdapter.NotifyDataSetChanged();
+				// this must run on the UI thread in order for the data to update
+				this.Activity.RunOnUiThread(() => this.categoriesAdapter.NotifyDataSetChanged());
 			}	
 		}
 

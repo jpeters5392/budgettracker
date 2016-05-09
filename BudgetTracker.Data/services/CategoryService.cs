@@ -18,12 +18,12 @@ namespace BudgetTracker.Data
 			this.log = log;
 		}
 
-		public async Task Delete(Category category)
+		public async Task<bool> Delete(Category category)
 		{
 			await this.azureMobileService.CategoryTable.DeleteAsync(category);
 
 			// sync categories
-			await this.azureMobileService.SyncTable<Category>(this.azureMobileService.CategoryTable, "allCategories");
+			return await this.azureMobileService.SyncTable<Category>(this.azureMobileService.CategoryTable, "allCategories");
 		}
 
 		public async Task InitializeService()
@@ -31,12 +31,12 @@ namespace BudgetTracker.Data
 			await this.azureMobileService.Initialize();
 		}
 
-		public async Task Insert(Category category)
+		public async Task<bool> Insert(Category category)
 		{
 			await this.azureMobileService.CategoryTable.InsertAsync(category);
 
 			// sync categories
-			await this.azureMobileService.SyncTable<Category>(this.azureMobileService.CategoryTable, "allCategories");
+			return await this.azureMobileService.SyncTable<Category>(this.azureMobileService.CategoryTable, "allCategories");
 		}
 
 		public async Task<IEnumerable<Category>> RetrieveCategories()

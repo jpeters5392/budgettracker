@@ -38,6 +38,7 @@ namespace BudgetTracker
 
 			this.azureService = new AzureMobileService(AzureUrl, new Log(), CrossConnectivity.Current);
 			this.categoryService = new CategoryService(azureService, new Log());
+			//this.categoryService = new MockCategoryService();
 
 			// Set our view from the "main" layout resource
 			SetContentView (Resource.Layout.Main);

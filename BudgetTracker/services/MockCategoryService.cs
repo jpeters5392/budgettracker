@@ -44,41 +44,41 @@ namespace BudgetTracker
 
 		public async Task<IEnumerable<Category>> RetrieveCategories() {
 			// TODO: since I am using a static list, I need to clone it so that deletions to the consumed list do not affect this list
-			return this.CloneList(categories).AsEnumerable();
+			return await Task.Run(() => this.CloneList(categories).AsEnumerable());
 		}
 
-		public Category RetrieveCategoryByName(string name) {
-			return categories.Where (x => x.Name == name).FirstOrDefault ();
+		public async Task<Category> RetrieveCategoryByName(string name) {
+			return await Task.Run(() => categories.Where (x => x.Name == name).FirstOrDefault ());
 		}
 
-		public Category RetrieveCategoryById(string id)
+		public async Task<Category> RetrieveCategoryById(string id)
 		{
-			return categories.Where(x => x.Id == id).FirstOrDefault();
+			return await Task.Run(() => categories.Where(x => x.Id == id).FirstOrDefault());
 		}
 
-		public void Delete(int position) {
-			categories.RemoveAt (position);
-		}
-
-		public void Delete(string id)
+		public async Task<bool> Delete(Category category)
 		{
-			var deletedCategory = categories.Where(x => x.Id == id).FirstOrDefault();
-			if (deletedCategory != null)
+			return await Task.Run(() =>
 			{
-				categories.Remove(deletedCategory);
-			}
+				var deletedCategory = categories.Where(x => x.Id == category.Id).FirstOrDefault();
+				if (deletedCategory == null)
+				{
+					return true;
+				}
+
+				return categories.Remove(deletedCategory);
+			});
 		}
 
-		public void Delete(Category category)
-		{
-			categories.Remove(category);
-		}
-
-		public void Insert(Category category) {
+		public async Task<bool> Insert(Category category) {
 			if (category.Id == Guid.Empty.ToString()) {
 				category.Id = Guid.NewGuid ().ToString();
 			}
-			categories.Add (category);
+			return await Task.Run(() =>
+			{
+				categories.Add(category);
+				return true;
+			});
 		}
 
 		private IList<Category> CloneList(IList<Category> categoryList)
@@ -102,27 +102,7 @@ namespace BudgetTracker
 
 		public Task InitializeService()
 		{
-			return Task.Run(() => { }); 
-		}
-
-		Task<Category> ICategoryService.RetrieveCategoryByName(string name)
-		{
-			throw new NotImplementedException();
-		}
-
-		Task<Category> ICategoryService.RetrieveCategoryById(string id)
-		{
-			throw new NotImplementedException();
-		}
-
-		Task ICategoryService.Delete(Category category)
-		{
-			throw new NotImplementedException();
-		}
-
-		Task ICategoryService.Insert(Category category)
-		{
-			throw new NotImplementedException();
+			return Task.Run(() => { });
 		}
 	}
 }

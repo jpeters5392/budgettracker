@@ -11,8 +11,8 @@ namespace SharedPCL
 		Task<IEnumerable<Category>> RetrieveCategories();
 		Task<Category> RetrieveCategoryByName(string name);
 		Task<Category> RetrieveCategoryById(string id);
-		Task Delete(Category category);
-		Task Insert(Category category);
+		Task<bool> Delete(Category category);
+		Task<bool> Insert(Category category);
 	}
 }
 
