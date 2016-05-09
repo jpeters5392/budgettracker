@@ -18,7 +18,7 @@ namespace BudgetTracker
 			set;
 		}
 
-		public Guid CategoryId {
+		public string CategoryId {
 			get;
 			set;
 		}

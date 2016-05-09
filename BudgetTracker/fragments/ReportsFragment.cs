@@ -3,19 +3,16 @@ using Android.Views;
 using Android.OS;
 using Android.Widget;
 using Android.Support.Design.Widget;
+using SharedPCL;
 
 namespace BudgetTracker
 {
 	public class ReportsFragment : Android.App.Fragment
 	{
 		private TransactionService transactionService;
-		private CategoryService categoryService;
+		private ICategoryService categoryService;
 
-		public ReportsFragment () : this(new TransactionService(), new CategoryService())
-		{
-		}
-
-		public ReportsFragment (TransactionService transactionService, CategoryService categoryService)
+		public ReportsFragment (TransactionService transactionService, ICategoryService categoryService)
 		{
 			this.transactionService = transactionService;
 			this.categoryService = categoryService;

@@ -8,6 +8,9 @@ using Android.Views;
 using Android.Support.V7.App;
 using Android.Support.Design.Widget;
 using Android.Support.V4.View;
+using BudgetTracker.Data;
+using SharedPCL;
+using Plugin.Connectivity;
 
 namespace BudgetTracker
 {
@@ -22,10 +25,19 @@ namespace BudgetTracker
 		private int currentNavigationItem = 0;
 		private const string SelectedNavigationIndex = "SelectedNavigationIndex";
 		private InputUtilities inputUtilities;
+		private const string AzureUrl = "http://budgettrackerilm.azurewebsites.net/";
+		private IAzureMobileService azureService;
+		private ICategoryService categoryService;
 
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
 			base.OnCreate (savedInstanceState);
+
+			// connect to Azure
+			Microsoft.WindowsAzure.MobileServices.CurrentPlatform.Init();
+
+			this.azureService = new AzureMobileService(AzureUrl, new Log(), CrossConnectivity.Current);
+			this.categoryService = new CategoryService(azureService, new Log());
 
 			// Set our view from the "main" layout resource
 			SetContentView (Resource.Layout.Main);
@@ -52,7 +64,7 @@ namespace BudgetTracker
 				this.currentNavigationItem = savedInstanceState.GetInt(SelectedNavigationIndex);
 				this.Title = this.GetString(this.titleResources [this.currentNavigationItem]);
 			} else {
-				this.SetFragment (new TransactionEntryFragment (new TransactionService(), new CategoryService (), this.inputUtilities), 0);
+				this.SetFragment (new TransactionEntryFragment (new TransactionService(), this.categoryService, this.inputUtilities), 0);
 			}
 		}
 
@@ -86,16 +98,16 @@ namespace BudgetTracker
 			switch (e.MenuItem.ItemId)
 			{
 				case Resource.Id.nav_reports:
-					fragment = new ReportsFragment (new TransactionService(), new CategoryService ());
+					fragment = new ReportsFragment (new TransactionService(), this.categoryService);
 					this.currentNavigationItem = 2;
 					break;
 				case Resource.Id.nav_categories:
-				fragment = new CategoriesFragment (new CategoryService (), new CategoryTypeService (), this.inputUtilities);
+				fragment = new CategoriesFragment (this.categoryService, new CategoryTypeService (), this.inputUtilities);
 					this.currentNavigationItem = 1;
 					break;
 				case Resource.Id.nav_transactions:
 				default:
-				fragment = new TransactionEntryFragment (new TransactionService(), new CategoryService (), this.inputUtilities);
+				fragment = new TransactionEntryFragment (new TransactionService(), this.categoryService, this.inputUtilities);
 					this.currentNavigationItem = 0;
 					break;
 			}

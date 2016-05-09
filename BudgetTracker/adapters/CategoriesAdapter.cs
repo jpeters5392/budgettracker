@@ -5,6 +5,7 @@ using Android.Views;
 using Android.Widget;
 using System.Collections.Generic;
 using Android.Support.Design.Widget;
+using SharedPCL;
 
 namespace BudgetTracker
 {
@@ -15,12 +16,12 @@ namespace BudgetTracker
 		private CategoryType[] categoryTypes;
 		private string[] categoryTypeNames;
 		private RecyclerView recyclerView;
-		private CategoryService categoryService;
+		private ICategoryService categoryService;
 
-		public CategoriesAdapter (CategoryService dataService, CategoryTypeService categoryTypeService, InputUtilities inputUtilities)
+		public CategoriesAdapter (IEnumerable<Category> categories, ICategoryService dataService, CategoryTypeService categoryTypeService, InputUtilities inputUtilities)
 		{
+			this.items = categories.ToList();
 			this.categoryService = dataService;
-			this.items = this.categoryService.RetrieveCategories ();
 			this.categoryTypes = categoryTypeService.RetrieveCategoryTypes ();
 			this.categoryTypeNames = this.categoryTypes.Select (x => Enum.GetName(typeof(CategoryType), x)).ToArray();
 			this.inputUtilities = inputUtilities;
@@ -102,8 +103,9 @@ namespace BudgetTracker
 					reason == Snackbar.Callback.DismissEventTimeout ||
 					reason == Snackbar.Callback.DismissEventConsecutive) {
 
+					//TODO: Delete is asynchronous, but this action is synchronous
 					// permanently delete the item
-					this.categoryService.Delete(e.AdapterPosition);
+					this.categoryService.Delete(item);
 
 					// cleanup
 					e = null;

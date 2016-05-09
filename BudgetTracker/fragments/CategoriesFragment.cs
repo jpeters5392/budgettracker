@@ -4,6 +4,9 @@ using Android.OS;
 using Android.Widget;
 using Android.Support.V7.Widget;
 using Android.Support.Design.Widget;
+using SharedPCL;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace BudgetTracker
 {
@@ -12,15 +15,13 @@ namespace BudgetTracker
 		private RecyclerView categoriesRecyclerView;
 		private FloatingActionButton fab;
 
-		private CategoryService categoryService;
+		private ICategoryService categoryService;
 		private CategoryTypeService categoryTypeService;
 		private InputUtilities inputUtilities;
+		private RecyclerView.Adapter categoriesAdapter;
+		private IEnumerable<Category> categories;
 
-		public CategoriesFragment() : this(new CategoryService(), new CategoryTypeService(), new InputUtilities())
-		{
-		}
-
-		public CategoriesFragment (CategoryService categoryService, CategoryTypeService categoryTypeService, InputUtilities inputUtilities)
+		public CategoriesFragment (ICategoryService categoryService, CategoryTypeService categoryTypeService, InputUtilities inputUtilities)
 		{
 			this.categoryService = categoryService;
 			this.categoryTypeService = categoryTypeService;
@@ -38,10 +39,22 @@ namespace BudgetTracker
 			RecyclerView.LayoutManager categoriesLayoutManager = new LinearLayoutManager (this.Activity);
 			categoriesRecyclerView.SetLayoutManager (categoriesLayoutManager);
 
-			RecyclerView.Adapter categoriesAdapter = new CategoriesAdapter (this.categoryService, this.categoryTypeService, this.inputUtilities);
+			this.categories = new List<Category>();
+
+			this.categoriesAdapter = new CategoriesAdapter (categories, this.categoryService, this.categoryTypeService, this.inputUtilities);
 			categoriesRecyclerView.SetAdapter (categoriesAdapter);
 
 			return view;
+		}
+
+		public async override void OnResume()
+		{
+			base.OnResume();
+
+			await this.categoryService.InitializeService();
+
+			this.categories = await this.categoryService.RetrieveCategories();
+			this.UpdateAdapter();
 		}
 
 		public override void OnDestroyView ()
@@ -58,6 +71,14 @@ namespace BudgetTracker
 			}
 
 			base.OnDestroyView ();
+		}
+
+		public void UpdateAdapter()
+		{
+			if (this.categoriesAdapter != null)
+			{
+				this.categoriesAdapter.NotifyDataSetChanged();
+			}	
 		}
 
 		public void AddCategory(object sender, EventArgs e) 
