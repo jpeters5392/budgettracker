@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/vendorInputLayout">
-        <EditText
+        <android.support.design.widget.TextInputEditText
             android:id="@+id/transactionVendor"
             android:layout_gravity="center"
             android:layout_width="match_parent"
@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:id="@+id/amountInputLayout">
-            <EditText
+            <android.support.design.widget.TextInputEditText
                 android:id="@+id/transactionAmount"
                 android:inputType="number|numberDecimal"
                 android:layout_gravity="left"
@@ -60,7 +60,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/descriptionInputLayout">
-        <EditText
+        <android.support.design.widget.TextInputEditText
             android:id="@+id/transactionDescription"
             android:layout_gravity="center"
             android:layout_width="fill_parent"

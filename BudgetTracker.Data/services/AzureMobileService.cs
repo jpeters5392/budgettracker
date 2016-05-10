@@ -17,6 +17,12 @@ namespace BudgetTracker.Data
 		private readonly ILog log;
 		private readonly IConnectivity connectivityPlugin;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="T:BudgetTracker.Data.AzureMobileService"/> class.
+		/// </summary>
+		/// <param name="url">The base URL for the Azure service.</param>
+		/// <param name="log">An instance of a logger.</param>
+		/// <param name="connectivityPlugin">The Xamarin Connectivity plugin so that we can detect network access.</param>
 		public AzureMobileService(string url, ILog log, IConnectivity connectivityPlugin)
 		{
 			this.url = url;
@@ -24,13 +30,33 @@ namespace BudgetTracker.Data
 			this.connectivityPlugin = connectivityPlugin;
 		}
 
+		/// <summary>
+		/// Gets or sets the mobile service client.
+		/// </summary>
+		/// <value>The mobile service client.</value>
 		public MobileServiceClient MobileService { get; set; }
 
+		/// <summary>
+		/// Gets or sets the sync table for the category model.
+		/// </summary>
+		/// <value>The category sync table.</value>
 		public IMobileServiceSyncTable<Category> CategoryTable { get; set; }
+
+		/// <summary>
+		/// Gets or sets the sync table for the transaction model.
+		/// </summary>
+		/// <value>The transaction sync table.</value>
 		public IMobileServiceSyncTable<Transaction> TransactionTable { get; set; }
 
+		/// <summary>
+		/// Gets or sets whether the Azure client has been initialized.
+		/// </summary>
+		/// <value>Whether the client is initialized.</value>
 		public bool IsInitialized { get; set; }
 
+		/// <summary>
+		/// Initializes this instance.
+		/// </summary>
 		public async Task Initialize()
 		{
 			if (IsInitialized)
@@ -53,10 +79,18 @@ namespace BudgetTracker.Data
 			IsInitialized = true;
 		}
 
+		/// <summary>
+		/// Syncs the table for the given model type.
+		/// </summary>
+		/// <returns>A Task of type bool that indicates the success.</returns>
+		/// <param name="syncTable">The sync table.</param>
+		/// <param name="queryId">The query identifier.</param>
+		/// <typeparam name="T">The type parameter for the type of model.</typeparam>
 		public async Task<bool> SyncTable<T>(IMobileServiceSyncTable<T> syncTable, string queryId)
 		{
-			var isReachable = await this.connectivityPlugin.IsReachable(this.url);
-			if (!isReachable)
+			var isConnected = this.connectivityPlugin.IsConnected;
+			//var isReachable = await this.connectivityPlugin.IsReachable(this.url);
+			if (!isConnected)
 			{
 				this.log.Debug(tag, "Cannot sync due to no connectivity");
 				return false;

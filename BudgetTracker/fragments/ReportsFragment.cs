@@ -8,15 +8,24 @@ using System;
 
 namespace BudgetTracker
 {
+	/// <summary>
+	/// Reports fragment.
+	/// </summary>
 	public class ReportsFragment : Android.App.Fragment
 	{
-		private const string Tag = "ReportsFragment";
+		private const string FragmentTag = "ReportsFragment";
 		private ITransactionService transactionService;
 		private ICategoryService categoryService;
 		private View view;
 		private LinearLayout reportLayout;
 		private readonly ILog log;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="T:BudgetTracker.ReportsFragment"/> class.
+		/// </summary>
+		/// <param name="transactionService">An instance of the transaction service.</param>
+		/// <param name="categoryService">An instance of the category service.</param>
+		/// <param name="log">An instance of a logger.</param>
 		public ReportsFragment (ITransactionService transactionService, ICategoryService categoryService, ILog log)
 		{
 			this.transactionService = transactionService;
@@ -24,6 +33,7 @@ namespace BudgetTracker
 			this.log = log;
 		}
 
+		#region Overrides
 		public override View OnCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			this.view = inflater.Inflate (Resource.Layout.Reports, container, false);
@@ -52,7 +62,11 @@ namespace BudgetTracker
 			}
 			catch (Exception ex)
 			{
-				this.log.Error(Tag, ex, "Error getting transactions");
+				this.log.Error(FragmentTag, ex, "Error getting transactions");
+
+				// alert the user that it failed
+				var toast = Toast.MakeText(this.Activity, "Error retrieving transactions", ToastLength.Long);
+				toast.Show();
 			}
 		}
 
@@ -72,6 +86,7 @@ namespace BudgetTracker
 
 			base.OnDestroy();
 		}
+		#endregion
 	}
 }
 

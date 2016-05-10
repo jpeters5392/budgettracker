@@ -11,10 +11,18 @@ using Android.Support.V7.App;
 
 namespace BudgetTracker
 {
+	/// <summary>
+	/// Category view holder.
+	/// </summary>
 	public class CategoryViewHolder : RecyclerView.ViewHolder
 	{
 		private InputUtilities inputUtilities;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="T:BudgetTracker.CategoryViewHolder"/> class.
+		/// </summary>
+		/// <param name="v">The containing view.</param>
+		/// <param name="inputUtilities">An instance of input utilities.</param>
 		public CategoryViewHolder (View v, InputUtilities inputUtilities) : base(v)
 		{
 			this.View = v;
@@ -40,8 +48,12 @@ namespace BudgetTracker
 			this.EditCategoryTypeView.Touch += OnSpinnerTouched;
 		}
 
+		/// <summary>
+		/// Occurs when item deleted.
+		/// </summary>
 		public event EventHandler<ItemDeletedEventArgs> ItemDeleted;
 
+		#region Overrides
 		protected override void Dispose (bool disposing)
 		{
 			if (this.EditCategoryButton != null) {
@@ -76,72 +88,129 @@ namespace BudgetTracker
 
 			base.Dispose (disposing);
 		}
+		#endregion
 
+		/// <summary>
+		/// Gets or sets the view.
+		/// </summary>
+		/// <value>The view.</value>
 		public View View {
 			get;
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets the category name view.
+		/// </summary>
+		/// <value>The category name view.</value>
 		public TextView CategoryNameView { 
 			get; 
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets the category description view.
+		/// </summary>
+		/// <value>The category description view.</value>
 		public TextView CategoryDescriptionView { 
 			get; 
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets the category type view.
+		/// </summary>
+		/// <value>The category type view.</value>
 		public TextView CategoryTypeView { 
 			get; 
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets the edit category name view.
+		/// </summary>
+		/// <value>The edit category name view.</value>
 		public EditText EditCategoryNameView { 
 			get; 
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets the edit category description view.
+		/// </summary>
+		/// <value>The edit category description view.</value>
 		public EditText EditCategoryDescriptionView { 
 			get; 
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets the edit category type view.
+		/// </summary>
+		/// <value>The edit category type view.</value>
 		public Spinner EditCategoryTypeView { 
 			get; 
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets the edit category button.
+		/// </summary>
+		/// <value>The edit category button.</value>
 		public Button EditCategoryButton { 
 			get; 
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets the cancel category button.
+		/// </summary>
+		/// <value>The cancel category button.</value>
 		public Button CancelCategoryButton { 
 			get; 
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets the save category button.
+		/// </summary>
+		/// <value>The save category button.</value>
 		public Button SaveCategoryButton { 
 			get; 
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets the delete category button.
+		/// </summary>
+		/// <value>The delete category button.</value>
 		public Button DeleteCategoryButton { 
 			get; 
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets the edit layout.
+		/// </summary>
+		/// <value>The edit layout.</value>
 		public View EditLayout { 
 			get; 
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets the display layout.
+		/// </summary>
+		/// <value>The display layout.</value>
 		public View DisplayLayout { 
 			get; 
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets the tag identifier.
+		/// </summary>
+		/// <value>The tag identifier.</value>
 		public IdTag TagId
 		{
 			get {
@@ -152,6 +221,11 @@ namespace BudgetTracker
 			}
 		}
 
+		/// <summary>
+		/// Handles when the spinner is touched.
+		/// </summary>
+		/// <param name="sender">Sender.</param>
+		/// <param name="e">E.</param>
 		protected void OnSpinnerTouched(object sender, EventArgs e)
 		{
 			// This is needed to remove the focus from the edit text boxes, and then focus and select the spinner
@@ -163,6 +237,11 @@ namespace BudgetTracker
 			spinner.PerformClick ();
 		}
 
+		/// <summary>
+		/// Handles when the edit button is pressed.
+		/// </summary>
+		/// <param name="sender">Sender.</param>
+		/// <param name="e">E.</param>
 		protected void OnEdit(object sender, EventArgs e)
 		{
 			this.EditCategoryNameView.Text = this.CategoryNameView.Text;
@@ -181,6 +260,11 @@ namespace BudgetTracker
 			this.inputUtilities.ShowKeyboard (this.EditCategoryNameView);
 		}
 
+		/// <summary>
+		/// Handles when the Save button is pressed.
+		/// </summary>
+		/// <param name="sender">Sender.</param>
+		/// <param name="e">E.</param>
 		protected void OnSave(object sender, EventArgs e)
 		{
 			this.inputUtilities.HideKeyboard (this.View);
@@ -199,6 +283,11 @@ namespace BudgetTracker
 			Toast.MakeText (this.View.Context, "Category saved: " + this.TagId.Id.ToString(), ToastLength.Short).Show();
 		}
 
+		/// <summary>
+		/// Handles when the cancel button is pressed.
+		/// </summary>
+		/// <param name="sender">Sender.</param>
+		/// <param name="e">E.</param>
 		protected void OnCancel(object sender, EventArgs e)
 		{
 			this.inputUtilities.HideKeyboard (this.View);
@@ -211,6 +300,11 @@ namespace BudgetTracker
 			animator.Start ();
 		}
 
+		/// <summary>
+		/// Handles when the delete button is pressed.
+		/// </summary>
+		/// <param name="sender">Sender.</param>
+		/// <param name="e">E.</param>
 		protected void OnDelete(object sender, EventArgs e)
 		{
 			var builder = new AlertDialog.Builder (this.View.Context);
@@ -221,6 +315,11 @@ namespace BudgetTracker
 			builder.Create ().Show ();
 		}
 
+		/// <summary>
+		/// Handles when the delete is confirmed.
+		/// </summary>
+		/// <param name="sender">Sender.</param>
+		/// <param name="e">E.</param>
 		protected void OnDeleteConfirmed(object sender, EventArgs e)
 		{
 			if (this.ItemDeleted != null) {
@@ -231,10 +330,21 @@ namespace BudgetTracker
 			}
 		}
 
+		/// <summary>
+		/// Handles when the delete is cancelled.
+		/// </summary>
+		/// <param name="sender">Sender.</param>
+		/// <param name="e">E.</param>
 		protected void OnDeleteCancelled(object sender, EventArgs e)
 		{
 		}
 			
+		/// <summary>
+		/// Creates an Animator to handle revealing a new view.
+		/// </summary>
+		/// <returns>The animator.</returns>
+		/// <param name="currentView">Current view.</param>
+		/// <param name="newView">New view.</param>
 		private Animator AnimateReveal(View currentView, View newView) {
 			// use currentView to get the dimensions since displayHolder is not drawn and is 0 x 0
 			// get the center for the clipping circle

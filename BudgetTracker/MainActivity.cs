@@ -15,7 +15,7 @@ using Plugin.Connectivity;
 namespace BudgetTracker
 {
 	[Activity (Label = "BudgetTracker", MainLauncher = true, Icon = "@mipmap/icon")]
-	[MetaData(AzureUrlSettingName, Value =" http://budgettrackerilm.azurewebsites.net/")]
+	[MetaData(AzureUrlSettingName, Value =" https://budgettrackerilm.azurewebsites.net/")]
 	public class MainActivity : AppCompatActivity
 	{
 		private DrawerLayout drawerLayout;
@@ -49,6 +49,7 @@ namespace BudgetTracker
 			//this.categoryService = new MockCategoryService();
 			//this.transactionService = new MockTransactionService();
 			this.transactionService = new TransactionService(this.azureService, this.log);
+			this.inputUtilities = new InputUtilities();
 
 			// Set our view from the "main" layout resource
 			SetContentView (Resource.Layout.Main);
@@ -66,14 +67,15 @@ namespace BudgetTracker
 			// get references to items in the view
 			this.drawerLayout = FindViewById<DrawerLayout> (Resource.Id.drawerLayout);
 			this.navigationView = FindViewById<NavigationView> (Resource.Id.nav_view);
+
+			// add an event handler for when the user attempts to navigate
 			this.navigationView.NavigationItemSelected += this.NavigateToItem;
-			this.inputUtilities = new InputUtilities ();
 
 			// set the transactions fragment to be displayed by default
 			if (savedInstanceState != null) {
 				// we just need to set the title, but not the fragment
 				this.currentNavigationItem = savedInstanceState.GetInt(SelectedNavigationIndex);
-				this.Title = this.GetString(this.titleResources [this.currentNavigationItem]);
+				this.Title = this.FindTitle(this.currentNavigationItem);
 			} else {
 				this.SetFragment (new TransactionEntryFragment (this.transactionService, this.categoryService, this.inputUtilities, this.log), 0);
 			}
@@ -127,6 +129,11 @@ namespace BudgetTracker
 		}
 		#endregion
 
+		/// <summary>
+		/// Navigates to the selected fragment.
+		/// </summary>
+		/// <param name="sender">Sender.</param>
+		/// <param name="e">E.</param>
 		protected void NavigateToItem(object sender, NavigationView.NavigationItemSelectedEventArgs e)
 		{
 			e.MenuItem.SetChecked (true);
@@ -140,7 +147,7 @@ namespace BudgetTracker
 					this.currentNavigationItem = 2;
 					break;
 				case Resource.Id.nav_categories:
-				fragment = new CategoriesFragment (this.categoryService, new CategoryTypeService (), this.inputUtilities);
+				fragment = new CategoriesFragment (this.categoryService, new CategoryTypeService (), this.inputUtilities, this.log);
 					this.currentNavigationItem = 1;
 					break;
 				case Resource.Id.nav_transactions:
@@ -155,10 +162,25 @@ namespace BudgetTracker
 			drawerLayout.CloseDrawers ();
 		}
 
+		/// <summary>
+		/// Sets the currently displayed fragment.
+		/// </summary>
+		/// <param name="fragment">The fragment.</param>
+		/// <param name="index">The fragment index.</param>
 		private void SetFragment(Fragment fragment, int index)
 		{
 			this.FragmentManager.BeginTransaction ().Replace (Resource.Id.frameLayout, fragment).Commit ();
-			this.Title = this.GetString(this.titleResources [index]);
+			this.Title = this.FindTitle(index);
+		}
+
+		/// <summary>
+		/// Retrieves the title that should be used given the current fragment index.
+		/// </summary>
+		/// <returns>The title.</returns>
+		/// <param name="index">The index to be used in the list of titles.</param>
+		private string FindTitle(int index)
+		{
+			return GetString(this.titleResources[this.currentNavigationItem]);
 		}
 	}
 }

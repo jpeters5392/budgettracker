@@ -12,7 +12,7 @@ namespace BudgetTracker
 {
 	public class TransactionEntryFragment : Android.App.Fragment
 	{
-		private const string Tag = "TransactionEntryFragment";
+		private const string FragmentTag = "TransactionEntryFragment";
 		private ITransactionService transactionService;
 		private ICategoryService categoryService;
 		private View view;
@@ -30,6 +30,13 @@ namespace BudgetTracker
 		private IList<string> categoryNames;
 		private readonly ILog log;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="T:BudgetTracker.TransactionEntryFragment"/> class.
+		/// </summary>
+		/// <param name="transactionService">An instance of the Transaction service.</param>
+		/// <param name="categoryService">An instance of the Category service.</param>
+		/// <param name="inputUtilities">An instance of input utilities.</param>
+		/// <param name="log">An instance of a logger.</param>
 		public TransactionEntryFragment (ITransactionService transactionService, ICategoryService categoryService, InputUtilities inputUtilities, ILog log)
 		{
 			this.transactionService = transactionService;
@@ -38,6 +45,7 @@ namespace BudgetTracker
 			this.log = log;
 		}
 
+		#region Overrides
 		public override View OnCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			this.view = inflater.Inflate (Resource.Layout.TransactionEntry, container, false);
@@ -74,27 +82,26 @@ namespace BudgetTracker
 			// after this that is expecting to run.
 			base.OnResume();
 
-			await this.categoryService.InitializeService();
-			await this.transactionService.InitializeService();
+			try
+			{
+				await this.categoryService.InitializeService();
+				await this.transactionService.InitializeService();
 
-			this.categories = await this.categoryService.RetrieveCategories();
-			this.categoryNames = categories.Select(x => x.Name).ToList();
-			this.categoriesAdapter = new ArrayAdapter<string>(this.Activity, Resource.Layout.support_simple_spinner_dropdown_item, this.categoryNames);
+				this.categories = await this.categoryService.RetrieveCategories();
+				this.categoryNames = categories.Select(x => x.Name).ToList();
+				this.categoriesAdapter = new ArrayAdapter<string>(this.Activity, Resource.Layout.support_simple_spinner_dropdown_item, this.categoryNames);
 
-			// run this on the UI thread so that it can be updated
-			this.Activity.RunOnUiThread(() => this.categorySpinner.Adapter = categoriesAdapter);
-		}
+				// run this on the UI thread so that it can be updated
+				this.Activity.RunOnUiThread(() => this.categorySpinner.Adapter = categoriesAdapter);
+			}
+			catch (Exception ex)
+			{
+				this.log.Error(FragmentTag, ex, "Error retrieving categories");
 
-		protected void OnSpinnerTouched(object sender, EventArgs e)
-		{
-			// This is needed to remove the focus from the edit text boxes, and then focus and select the spinner
-			Spinner spinner = (Spinner)sender;
-			this.inputUtilities.HideKeyboard (this.view);
-			this.transactionAmount.ClearFocus ();
-			this.transactionVendor.ClearFocus ();
-			this.transactionDescription.ClearFocus ();
-			spinner.RequestFocusFromTouch ();
-			spinner.PerformClick ();
+				// alert the user that it failed
+				var toast = Toast.MakeText(this.Activity, "Error retrieving categories", ToastLength.Long);
+				toast.Show();
+			}
 		}
 
 		public override void OnDestroyView ()
@@ -141,7 +148,30 @@ namespace BudgetTracker
 
 			base.OnDestroyView ();
 		}
+		#endregion
 
+		/// <summary>
+		/// Handles a touch event on the spinner
+		/// </summary>
+		/// <param name="sender">Sender.</param>
+		/// <param name="e">E.</param>
+		protected void OnSpinnerTouched(object sender, EventArgs e)
+		{
+			// This is needed to remove the focus from the edit text boxes, and then focus and select the spinner
+			var spinner = (Spinner)sender;
+			this.inputUtilities.HideKeyboard(this.view);
+			this.transactionAmount.ClearFocus();
+			this.transactionVendor.ClearFocus();
+			this.transactionDescription.ClearFocus();
+			spinner.RequestFocusFromTouch();
+			spinner.PerformClick();
+		}
+
+		/// <summary>
+		/// Saves the transaction.
+		/// </summary>
+		/// <param name="sender">Sender.</param>
+		/// <param name="e">E.</param>
 		public async void SaveTransaction(object sender, EventArgs e)
 		{
 			// hide the keyboard
@@ -171,7 +201,7 @@ namespace BudgetTracker
 				}
 				catch (Exception ex)
 				{
-					log.Error(Tag, ex, "Error inserting transaction");
+					log.Error(FragmentTag, ex, "Error inserting transaction");
 					// alert the user that it failed
 					var toast = Toast.MakeText(this.Activity, ex.Message, ToastLength.Long);
 					toast.Show();
@@ -179,6 +209,11 @@ namespace BudgetTracker
 			}
 		}
 
+		/// <summary>
+		/// Validates the amount.
+		/// </summary>
+		/// <returns>Whether the amount is valid.</returns>
+		/// <param name="amount">The amount.</param>
 		private bool ValidateAmount(out decimal amount) {
 			amount = 0;
 			if (decimal.TryParse (this.transactionAmount.Text, out amount)) {
@@ -194,6 +229,10 @@ namespace BudgetTracker
 			}
 		}
 
+		/// <summary>
+		/// Validates the vendor.
+		/// </summary>
+		/// <returns>Whether the vendor is valid.</returns>
 		private bool ValidateVendor() {
 			if (string.IsNullOrWhiteSpace(this.transactionVendor.Text)) {
 				this.vendorInputLayout.Error = this.Activity.GetString(Resource.String.vendorRequired);
@@ -208,6 +247,9 @@ namespace BudgetTracker
 			}
 		}
 
+		/// <summary>
+		/// Resets the fields.
+		/// </summary>
 		private void ResetFields() {
 			this.transactionAmount.Text = "";
 			this.transactionVendor.Text = "";
@@ -215,10 +257,17 @@ namespace BudgetTracker
 			this.categorySpinner.SetSelection (0);
 		}
 
+		/// <summary>
+		/// Clears the transaction amount text.
+		/// </summary>
+		/// <param name="v">The view.</param>
 		private void ClearTransactionAmountText(View v) {
 			this.transactionAmount.Text = "";
 		}
 
+		/// <summary>
+		/// Clears the focus and hides the keyboard.
+		/// </summary>
 		private void ClearFocusAndHideKeyboard()
 		{
 			this.inputUtilities.HideKeyboard (this.view);

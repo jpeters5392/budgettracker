@@ -9,6 +9,9 @@ using SharedPCL;
 
 namespace BudgetTracker
 {
+	/// <summary>
+	/// Categories adapter.
+	/// </summary>
 	public class CategoriesAdapter : RecyclerView.Adapter
 	{
 		private IList<Category> categories;
@@ -18,15 +21,25 @@ namespace BudgetTracker
 		private RecyclerView recyclerView;
 		private readonly ICategoryService categoryService;
 
-		public CategoriesAdapter (ICategoryService dataService, CategoryTypeService categoryTypeService, InputUtilities inputUtilities)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="T:BudgetTracker.CategoriesAdapter"/> class.
+		/// </summary>
+		/// <param name="categoryService">An instance of the category service service.</param>
+		/// <param name="categoryTypeService">An instance of the category type service.</param>
+		/// <param name="inputUtilities">An instance of input utilities.</param>
+		public CategoriesAdapter (ICategoryService categoryService, CategoryTypeService categoryTypeService, InputUtilities inputUtilities)
 		{
 			this.categories = new List<Category>();
-			this.categoryService = dataService;
+			this.categoryService = categoryService;
 			this.categoryTypes = categoryTypeService.RetrieveCategoryTypes ();
 			this.categoryTypeNames = this.categoryTypes.Select (x => Enum.GetName(typeof(CategoryType), x)).ToArray();
 			this.inputUtilities = inputUtilities;
 		}
 
+		/// <summary>
+		/// Gets or sets the categories.
+		/// </summary>
+		/// <value>The categories.</value>
 		public IList<Category> Categories
 		{
 			get
@@ -39,6 +52,7 @@ namespace BudgetTracker
 			}
 		}
 
+		#region Overrides
 		public override RecyclerView.ViewHolder OnCreateViewHolder (ViewGroup parent, int viewType)
 		{
 			// set the view's size, margins, paddings and layout parameters
@@ -96,7 +110,13 @@ namespace BudgetTracker
 				return this.categories.Count;
 			}
 		}
+		#endregion
 
+		/// <summary>
+		/// Handles an item delete event.
+		/// </summary>
+		/// <param name="sender">Sender.</param>
+		/// <param name="e">E.</param>
 		public void OnItemDelete(object sender, ItemDeletedEventArgs e)
 		{
 			var item = this.categories [e.AdapterPosition];

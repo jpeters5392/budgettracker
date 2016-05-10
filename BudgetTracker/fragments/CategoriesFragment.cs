@@ -11,8 +11,12 @@ using System.Collections.Generic;
 
 namespace BudgetTracker
 {
+	/// <summary>
+	/// Categories fragment.
+	/// </summary>
 	public class CategoriesFragment : Android.App.Fragment
 	{
+		private const string FragmentTag = "CategoriesFragment";
 		private RecyclerView categoriesRecyclerView;
 		private FloatingActionButton fab;
 
@@ -21,12 +25,21 @@ namespace BudgetTracker
 		private InputUtilities inputUtilities;
 		private CategoriesAdapter categoriesAdapter;
 		private IEnumerable<Category> categories;
+		private readonly ILog log;
 
-		public CategoriesFragment (ICategoryService categoryService, CategoryTypeService categoryTypeService, InputUtilities inputUtilities)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="T:BudgetTracker.CategoriesFragment"/> class.
+		/// </summary>
+		/// <param name="categoryService">An instance of the category service.</param>
+		/// <param name="categoryTypeService">An instance of the category type service.</param>
+		/// <param name="inputUtilities">An instance of input utilities.</param>
+		/// <param name="log">An instance of a logger.</param>
+		public CategoriesFragment (ICategoryService categoryService, CategoryTypeService categoryTypeService, InputUtilities inputUtilities, ILog log)
 		{
 			this.categoryService = categoryService;
 			this.categoryTypeService = categoryTypeService;
 			this.inputUtilities = inputUtilities;
+			this.log = log;
 		}
 
 		public override View OnCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -57,11 +70,22 @@ namespace BudgetTracker
 			// after this that is expecting to run.
 			base.OnResume();
 
-			await this.categoryService.InitializeService();
+			try
+			{
+				await this.categoryService.InitializeService();
 
-			this.categories = await this.categoryService.RetrieveCategories();
-			this.categoriesAdapter.Categories = this.categories.ToList();
-			this.UpdateAdapter();
+				this.categories = await this.categoryService.RetrieveCategories();
+				this.categoriesAdapter.Categories = this.categories.ToList();
+				this.UpdateAdapter();
+			}
+			catch (Exception ex)
+			{
+				this.log.Error(FragmentTag, ex, "Error getting categories");
+
+				// alert the user that it failed
+				var toast = Toast.MakeText(this.Activity, "Error retrieving categories", ToastLength.Long);
+				toast.Show();
+			}
 		}
 
 		public override void OnDestroyView ()
@@ -88,6 +112,9 @@ namespace BudgetTracker
 			base.OnDestroyView ();
 		}
 
+		/// <summary>
+		/// Updates the adapter on the UI thread.
+		/// </summary>
 		public void UpdateAdapter()
 		{
 			if (this.categoriesAdapter != null)
@@ -97,6 +124,11 @@ namespace BudgetTracker
 			}	
 		}
 
+		/// <summary>
+		/// The event handler for clicking on the floating action button.  This will display a form to add a new category.
+		/// </summary>
+		/// <param name="sender">Sender.</param>
+		/// <param name="e">E.</param>
 		public void AddCategory(object sender, EventArgs e) 
 		{
 			var toast = Toast.MakeText (this.Activity, "Clicked FAB", ToastLength.Short);
