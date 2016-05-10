@@ -12,7 +12,8 @@ namespace BudgetTracker
 {
 	public class TransactionEntryFragment : Android.App.Fragment
 	{
-		private TransactionService transactionService;
+		private const string Tag = "TransactionEntryFragment";
+		private ITransactionService transactionService;
 		private ICategoryService categoryService;
 		private View view;
 		private Button saveButton;
@@ -27,12 +28,14 @@ namespace BudgetTracker
 		private ArrayAdapter categoriesAdapter;
 		private IEnumerable<Category> categories;
 		private IList<string> categoryNames;
+		private readonly ILog log;
 
-		public TransactionEntryFragment (TransactionService transactionService, ICategoryService categoryService, InputUtilities inputUtilities)
+		public TransactionEntryFragment (ITransactionService transactionService, ICategoryService categoryService, InputUtilities inputUtilities, ILog log)
 		{
 			this.transactionService = transactionService;
 			this.categoryService = categoryService;
 			this.inputUtilities = inputUtilities;
+			this.log = log;
 		}
 
 		public override View OnCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -72,6 +75,7 @@ namespace BudgetTracker
 			base.OnResume();
 
 			await this.categoryService.InitializeService();
+			await this.transactionService.InitializeService();
 
 			this.categories = await this.categoryService.RetrieveCategories();
 			this.categoryNames = categories.Select(x => x.Name).ToList();
@@ -150,18 +154,28 @@ namespace BudgetTracker
 				var selectedCategory = await this.categoryService.RetrieveCategoryByName (this.categorySpinner.SelectedItem.ToString ());
 				var transaction = new Transaction ();
 				transaction.CategoryId = selectedCategory.Id;
-				transaction.Id = Guid.NewGuid ();
+				transaction.Id = Guid.NewGuid ().ToString();
 				transaction.Amount = amount;
 				transaction.Vendor = this.transactionVendor.Text;
 				transaction.Description = this.transactionDescription.Text;
-				this.transactionService.Insert (transaction);
+				try
+				{
+					await this.transactionService.Insert(transaction);
 
-				// alert the user that it was successful
-				var toast = Toast.MakeText (this.Activity, Resource.String.TransactionSaved, ToastLength.Short);
-				toast.Show ();
+					// alert the user that it was successful
+					var toast = Toast.MakeText(this.Activity, Resource.String.TransactionSaved, ToastLength.Short);
+					toast.Show();
 
-				// reset the form
-				this.ResetFields();
+					// reset the form
+					this.ResetFields();
+				}
+				catch (Exception ex)
+				{
+					log.Error(Tag, ex, "Error inserting transaction");
+					// alert the user that it failed
+					var toast = Toast.MakeText(this.Activity, ex.Message, ToastLength.Long);
+					toast.Show();
+				}
 			}
 		}
 

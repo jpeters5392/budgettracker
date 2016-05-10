@@ -71,7 +71,7 @@ namespace BudgetTracker
 		}
 
 		public async Task<bool> Insert(Category category) {
-			if (category.Id == Guid.Empty.ToString()) {
+			if (category.Id == null) {
 				category.Id = Guid.NewGuid ().ToString();
 			}
 			return await Task.Run(() =>

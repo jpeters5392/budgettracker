@@ -38,6 +38,7 @@
     <Compile Include="models\Transaction.cs" />
     <Compile Include="models\ICategoryService.cs" />
     <Compile Include="models\ILog.cs" />
+    <Compile Include="models\ITransactionService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="models\" />

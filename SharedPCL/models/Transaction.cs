@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace BudgetTracker
 {
@@ -8,10 +9,15 @@ namespace BudgetTracker
 		{
 		}
 
-		public Guid Id {
+		[JsonProperty("Id")]
+		public string Id
+		{
 			get;
 			set;
 		}
+
+		[Microsoft.WindowsAzure.MobileServices.Version]
+		public string AzureVersion { get; set; }
 
 		public decimal Amount {
 			get;

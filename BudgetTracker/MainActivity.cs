@@ -15,20 +15,24 @@ using Plugin.Connectivity;
 namespace BudgetTracker
 {
 	[Activity (Label = "BudgetTracker", MainLauncher = true, Icon = "@mipmap/icon")]
+	[MetaData(AzureUrlSettingName, Value =" http://budgettrackerilm.azurewebsites.net/")]
 	public class MainActivity : AppCompatActivity
 	{
 		private DrawerLayout drawerLayout;
 		private NavigationView navigationView;
 
-		private int[] titleResources = new int[] { Resource.String.transactionEntry, Resource.String.categories, Resource.String.reports };
+		private readonly int[] titleResources = new int[] { Resource.String.transactionEntry, Resource.String.categories, Resource.String.reports };
 
 		private int currentNavigationItem = 0;
 		private const string SelectedNavigationIndex = "SelectedNavigationIndex";
 		private InputUtilities inputUtilities;
-		private const string AzureUrl = "http://budgettrackerilm.azurewebsites.net/";
+		private const string AzureUrlSettingName = "azureUrl";
 		private IAzureMobileService azureService;
 		private ICategoryService categoryService;
+		private ITransactionService transactionService;
+		private ILog log;
 
+		#region Overrides
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
 			base.OnCreate (savedInstanceState);
@@ -36,9 +40,15 @@ namespace BudgetTracker
 			// connect to Azure
 			Microsoft.WindowsAzure.MobileServices.CurrentPlatform.Init();
 
-			this.azureService = new AzureMobileService(AzureUrl, new Log(), CrossConnectivity.Current);
-			this.categoryService = new CategoryService(azureService, new Log());
+			var activityMetadata = this.PackageManager.GetActivityInfo(this.ComponentName, Android.Content.PM.PackageInfoFlags.Activities|Android.Content.PM.PackageInfoFlags.MetaData).MetaData;
+			var azureUrl = activityMetadata.GetString(AzureUrlSettingName);
+
+			this.log = new Log();
+			this.azureService = new AzureMobileService(azureUrl, this.log, CrossConnectivity.Current);
+			this.categoryService = new CategoryService(this.azureService, this.log);
 			//this.categoryService = new MockCategoryService();
+			//this.transactionService = new MockTransactionService();
+			this.transactionService = new TransactionService(this.azureService, this.log);
 
 			// Set our view from the "main" layout resource
 			SetContentView (Resource.Layout.Main);
@@ -65,7 +75,7 @@ namespace BudgetTracker
 				this.currentNavigationItem = savedInstanceState.GetInt(SelectedNavigationIndex);
 				this.Title = this.GetString(this.titleResources [this.currentNavigationItem]);
 			} else {
-				this.SetFragment (new TransactionEntryFragment (new TransactionService(), this.categoryService, this.inputUtilities), 0);
+				this.SetFragment (new TransactionEntryFragment (this.transactionService, this.categoryService, this.inputUtilities, this.log), 0);
 			}
 		}
 
@@ -90,6 +100,33 @@ namespace BudgetTracker
 			base.OnDestroy ();
 		}
 
+		public override bool OnOptionsItemSelected(IMenuItem item)
+		{
+			this.inputUtilities.HideKeyboard(this.drawerLayout);
+
+			//
+			// Other cases go here for other buttons in the ActionBar.
+			// This sample app has no other buttons. This code is a placeholder to show what would be needed if there were other buttons.
+			//
+			switch (item.ItemId)
+			{
+				case Android.Resource.Id.Home:
+					if (this.drawerLayout.IsDrawerOpen(GravityCompat.Start))
+					{
+						this.drawerLayout.CloseDrawer(GravityCompat.Start);
+					}
+					else
+					{
+						this.drawerLayout.OpenDrawer(GravityCompat.Start);
+					}
+
+					return true;
+			}
+
+			return base.OnOptionsItemSelected(item);
+		}
+		#endregion
+
 		protected void NavigateToItem(object sender, NavigationView.NavigationItemSelectedEventArgs e)
 		{
 			e.MenuItem.SetChecked (true);
@@ -99,7 +136,7 @@ namespace BudgetTracker
 			switch (e.MenuItem.ItemId)
 			{
 				case Resource.Id.nav_reports:
-					fragment = new ReportsFragment (new TransactionService(), this.categoryService);
+					fragment = new ReportsFragment (this.transactionService, this.categoryService, this.log);
 					this.currentNavigationItem = 2;
 					break;
 				case Resource.Id.nav_categories:
@@ -108,7 +145,7 @@ namespace BudgetTracker
 					break;
 				case Resource.Id.nav_transactions:
 				default:
-				fragment = new TransactionEntryFragment (new TransactionService(), this.categoryService, this.inputUtilities);
+				fragment = new TransactionEntryFragment (this.transactionService, this.categoryService, this.inputUtilities, this.log);
 					this.currentNavigationItem = 0;
 					break;
 			}
@@ -116,32 +153,6 @@ namespace BudgetTracker
 			this.SetFragment (fragment, this.currentNavigationItem);
 
 			drawerLayout.CloseDrawers ();
-		}
-
-		public override bool OnOptionsItemSelected(IMenuItem item)
-		{
-			this.inputUtilities.HideKeyboard (this.drawerLayout);
-
-			//
-			// Other cases go here for other buttons in the ActionBar.
-			// This sample app has no other buttons. This code is a placeholder to show what would be needed if there were other buttons.
-			//
-			switch (item.ItemId)
-			{
-			case Android.Resource.Id.Home:
-				if (this.drawerLayout.IsDrawerOpen (GravityCompat.Start)) 
-				{
-					this.drawerLayout.CloseDrawer (GravityCompat.Start);
-				} 
-				else 
-				{
-					this.drawerLayout.OpenDrawer (GravityCompat.Start);
-				}
-
-				return true;
-			}
-
-			return base.OnOptionsItemSelected(item);
 		}
 
 		private void SetFragment(Fragment fragment, int index)

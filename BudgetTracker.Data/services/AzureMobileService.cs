@@ -27,6 +27,7 @@ namespace BudgetTracker.Data
 		public MobileServiceClient MobileService { get; set; }
 
 		public IMobileServiceSyncTable<Category> CategoryTable { get; set; }
+		public IMobileServiceSyncTable<Transaction> TransactionTable { get; set; }
 
 		public bool IsInitialized { get; set; }
 
@@ -42,17 +43,20 @@ namespace BudgetTracker.Data
 			// creates the local sqlite store for offline syncing
 			var store = new MobileServiceSQLiteStore(syncStorePath);
 			store.DefineTable<Category>();
+			store.DefineTable<Transaction>();
 
 			await MobileService.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
 			this.CategoryTable = MobileService.GetSyncTable<Category>();
+			this.TransactionTable = MobileService.GetSyncTable<Transaction>();
 
 			IsInitialized = true;
 		}
 
 		public async Task<bool> SyncTable<T>(IMobileServiceSyncTable<T> syncTable, string queryId)
 		{
-			if (!this.connectivityPlugin.IsConnected)
+			var isReachable = await this.connectivityPlugin.IsReachable(this.url);
+			if (!isReachable)
 			{
 				this.log.Debug(tag, "Cannot sync due to no connectivity");
 				return false;

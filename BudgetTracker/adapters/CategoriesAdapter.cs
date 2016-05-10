@@ -20,7 +20,7 @@ namespace BudgetTracker
 
 		public CategoriesAdapter (ICategoryService dataService, CategoryTypeService categoryTypeService, InputUtilities inputUtilities)
 		{
-			this.categories = categories.ToList();
+			this.categories = new List<Category>();
 			this.categoryService = dataService;
 			this.categoryTypes = categoryTypeService.RetrieveCategoryTypes ();
 			this.categoryTypeNames = this.categoryTypes.Select (x => Enum.GetName(typeof(CategoryType), x)).ToArray();

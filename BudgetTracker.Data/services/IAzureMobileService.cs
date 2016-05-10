@@ -9,6 +9,7 @@ namespace BudgetTracker.Data
 	{
 		MobileServiceClient MobileService { get; set; }
 		IMobileServiceSyncTable<Category> CategoryTable { get; set; }
+		IMobileServiceSyncTable<Transaction> TransactionTable { get; set; }
 		bool IsInitialized { get; set; }
 		Task Initialize();
 		Task<bool> SyncTable<T>(IMobileServiceSyncTable<T> syncTable, string queryId);

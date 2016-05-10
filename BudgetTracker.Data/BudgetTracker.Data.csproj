@@ -33,6 +33,7 @@
     <Compile Include="services\CategoryService.cs" />
     <Compile Include="services\AzureMobileService.cs" />
     <Compile Include="services\IAzureMobileService.cs" />
+    <Compile Include="services\TransactionService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="services\" />
