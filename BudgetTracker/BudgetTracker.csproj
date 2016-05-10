@@ -108,10 +108,10 @@
     <Compile Include="utilities\InputUtilities.cs" />
     <Compile Include="models\ItemDeletedEventArgs.cs" />
     <Compile Include="utilities\SnackbarCallback.cs" />
-    <Compile Include="services\TransactionService.cs" />
     <Compile Include="fragments\TransactionEntryFragment.cs" />
     <Compile Include="utilities\Log.cs" />
     <Compile Include="services\MockCategoryService.cs" />
+    <Compile Include="services\MockTransactionService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />

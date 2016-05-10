@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices;
 using Microsoft.WindowsAzure.MobileServices.SQLiteStore;
 using Microsoft.WindowsAzure.MobileServices.Sync;
-using Plugin.Connectivity;
 using Plugin.Connectivity.Abstractions;
 using SharedPCL;
 
