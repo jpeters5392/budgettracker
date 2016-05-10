@@ -90,9 +90,10 @@ namespace BudgetTracker
 				this.categories = await this.categoryService.RetrieveCategories();
 				this.categoryNames = categories.Select(x => x.Name).ToList();
 				this.categoriesAdapter = new ArrayAdapter<string>(this.Activity, Resource.Layout.support_simple_spinner_dropdown_item, this.categoryNames);
+				this.categorySpinner.Adapter = categoriesAdapter;
 
 				// run this on the UI thread so that it can be updated
-				this.Activity.RunOnUiThread(() => this.categorySpinner.Adapter = categoriesAdapter);
+				//this.Activity.RunOnUiThread(() => this.categorySpinner.Adapter = categoriesAdapter);
 			}
 			catch (Exception ex)
 			{

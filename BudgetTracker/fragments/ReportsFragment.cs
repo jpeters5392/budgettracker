@@ -53,12 +53,12 @@ namespace BudgetTracker
 
 				var transactions = await this.transactionService.RetrieveTransactions();
 
-				this.Activity.RunOnUiThread(() =>
-				{
+				//this.Activity.RunOnUiThread(() =>
+				//{
 					var textView = new TextView(this.view.Context);
 					textView.Text = "Transaction count: " + transactions.ToList().Count;
 					this.reportLayout.AddView(textView);
-				});
+				//});
 			}
 			catch (Exception ex)
 			{

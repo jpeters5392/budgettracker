@@ -76,7 +76,8 @@ namespace BudgetTracker
 
 				this.categories = await this.categoryService.RetrieveCategories();
 				this.categoriesAdapter.Categories = this.categories.ToList();
-				this.UpdateAdapter();
+				this.categoriesAdapter.NotifyDataSetChanged();
+				//this.UpdateAdapter();
 			}
 			catch (Exception ex)
 			{
