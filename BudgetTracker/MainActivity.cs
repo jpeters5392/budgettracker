@@ -1,21 +1,16 @@
 ﻿using Android.App;
-using Android.Widget;
 using Android.OS;
 using Android.Support.V4.Widget;
-using Android.Runtime;
-using Java.Lang;
 using Android.Views;
 using Android.Support.V7.App;
 using Android.Support.Design.Widget;
 using Android.Support.V4.View;
-using BudgetTracker.Data;
 using SharedPCL;
-using Plugin.Connectivity;
 
 namespace BudgetTracker
 {
 	[Activity (Label = "BudgetTracker", MainLauncher = true, Icon = "@mipmap/icon")]
-	[MetaData(AzureUrlSettingName, Value =" https://budgettrackerilm.azurewebsites.net/")]
+	//[MetaData(AzureUrlSettingName, Value =" https://budgettrackerilm.azurewebsites.net/")]
 	public class MainActivity : AppCompatActivity
 	{
 		private DrawerLayout drawerLayout;
@@ -26,8 +21,7 @@ namespace BudgetTracker
 		private int currentNavigationItem = 0;
 		private const string SelectedNavigationIndex = "SelectedNavigationIndex";
 		private InputUtilities inputUtilities;
-		private const string AzureUrlSettingName = "azureUrl";
-		private IAzureMobileService azureService;
+		//private const string AzureUrlSettingName = "azureUrl";
 		private ICategoryService categoryService;
 		private ITransactionService transactionService;
 		private ILog log;
@@ -38,17 +32,15 @@ namespace BudgetTracker
 			base.OnCreate (savedInstanceState);
 
 			// connect to Azure
-			Microsoft.WindowsAzure.MobileServices.CurrentPlatform.Init();
+			// Microsoft.WindowsAzure.MobileServices.CurrentPlatform.Init();
 
-			var activityMetadata = this.PackageManager.GetActivityInfo(this.ComponentName, Android.Content.PM.PackageInfoFlags.Activities|Android.Content.PM.PackageInfoFlags.MetaData).MetaData;
-			var azureUrl = activityMetadata.GetString(AzureUrlSettingName);
+			// leaving this here for people who want to try to integrate this with Azure.
+			//var activityMetadata = this.PackageManager.GetActivityInfo(this.ComponentName, Android.Content.PM.PackageInfoFlags.Activities|Android.Content.PM.PackageInfoFlags.MetaData).MetaData;
+			//var azureUrl = activityMetadata.GetString(AzureUrlSettingName);
 
 			this.log = new Log();
-			this.azureService = new AzureMobileService(azureUrl, this.log, CrossConnectivity.Current);
-			this.categoryService = new CategoryService(this.azureService, this.log);
-			//this.categoryService = new MockCategoryService();
-			//this.transactionService = new MockTransactionService();
-			this.transactionService = new TransactionService(this.azureService, this.log);
+			this.categoryService = new MockCategoryService();
+			this.transactionService = new MockTransactionService();
 			this.inputUtilities = new InputUtilities();
 
 			// Set our view from the "main" layout resource
