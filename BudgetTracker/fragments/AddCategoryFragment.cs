@@ -131,6 +131,8 @@ namespace BudgetTracker
 			{
 				this.nameLayout.Error = this.Activity.GetString(Resource.String.categoryNameRequired);
 				this.nameLayout.ErrorEnabled = true;
+				this.editName.RequestFocus();
+				this.inputUtilities.ShowKeyboard(this.editName);
 			}
 			else
 			{
