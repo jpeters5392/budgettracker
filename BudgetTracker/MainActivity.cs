@@ -23,7 +23,6 @@ namespace BudgetTracker
 		private const string SelectedNavigationIndex = "SelectedNavigationIndex";
 		private InputUtilities inputUtilities;
 		private const string AzureUrlSettingName = "azureUrl";
-		private IAzureMobileService azureService;
 
 		#region Overrides
 		protected override void OnCreate (Bundle savedInstanceState)
