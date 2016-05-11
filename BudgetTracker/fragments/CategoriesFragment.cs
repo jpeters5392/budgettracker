@@ -26,7 +26,7 @@ namespace BudgetTracker
 		private ICategoryTypeService categoryTypeService;
 		private InputUtilities inputUtilities;
 		private CategoriesAdapter categoriesAdapter;
-		private IEnumerable<Category> categories;
+		private IList<Category> categories;
 		private readonly ILog log;
 
         public CategoriesFragment() : this(TinyIoCContainer.Current.Resolve<ICategoryService>(), 
@@ -143,8 +143,8 @@ namespace BudgetTracker
 		/// <param name="e">E.</param>
 		public void AddCategory(object sender, EventArgs e) 
 		{
-			var toast = Toast.MakeText (this.Activity, "Clicked FAB", ToastLength.Short);
-			toast.Show ();
+			var fragment = new AddCategoryFragment();
+			this.FragmentManager.BeginTransaction().Replace(Resource.Id.frameLayout, fragment).AddToBackStack(null).Commit();
 		}
 	}
 }

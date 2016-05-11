@@ -10,6 +10,7 @@
 	<string name="transactionVendorHint">Vendor</string>
 	<string name="transactionIncorrectFormat">You must enter a dollar amount</string>
 	<string name="vendorRequired">You must enter a vendor</string>
+	<string name="categoryNameRequired">You must enter a category name</string>
 	<string name="saveTransaction">Save</string>
 	<string name="transactions">Transactions</string>
 	<string name="transactionEntry">Transaction Entry</string>
@@ -27,7 +28,12 @@
 	<string name="categoryDeleted">Category Deleted</string>
 	<string name="confirmDeleteTitle">Confirm Delete</string>
 	<string name="confirmDeleteMessage">Are you sure that you want to delete this?</string>
-  <string name="go">Go</string>
-  <string name="emptyCategories">You do not have any categories, click Go to add categories</string>
-  <string name="missingCategories">Missing Categories</string>
+	<string name="go">Go</string>
+	<string name="emptyCategories">You do not have any categories, click Go to add categories</string>
+	<string name="missingCategories">Missing Categories</string>
+	<string name="addCategory">Add Category</string>
+	<string name="categoryName">Category Name</string>
+	<string name="categoryType">Category Type</string>
+	<string name="failed">Failed</string>
+	<string name="categorySaved">Category Saved</string>
 </resources>

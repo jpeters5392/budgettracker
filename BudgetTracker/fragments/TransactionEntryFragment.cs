@@ -107,9 +107,8 @@ namespace BudgetTracker
                        .SetMessage(Resource.String.emptyCategories)
                        .SetPositiveButton(Resource.String.go, delegate {
                            //TODO: Find a better way to handle managing the fragments.
-                           var fragment = new CategoriesFragment();
+                           var fragment = new AddCategoryFragment();
                            this.FragmentManager.BeginTransaction().Replace(Resource.Id.frameLayout, fragment).AddToBackStack(null).Commit();
-                           this.Activity.Title = this.GetString(Resource.String.categories);
                        });
 
                     builder.Create().Show();
