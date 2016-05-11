@@ -35,7 +35,7 @@ namespace BudgetTracker
 
 		}
 
-		public async Task<IEnumerable<Transaction>> RetrieveTransactions() {
+		public async Task<IList<Transaction>> RetrieveTransactions() {
 			return await Task.Run(() => transactions);
 		}
 	}

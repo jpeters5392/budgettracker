@@ -62,12 +62,12 @@ namespace BudgetTracker.Data
 		/// Retrieves all of the categories.
 		/// </summary>
 		/// <returns>All of the categories.</returns>
-		public async Task<IEnumerable<Category>> RetrieveCategories()
+		public async Task<IList<Category>> RetrieveCategories()
 		{
 			// attempt to sync
 			await this.azureMobileService.SyncTable<Category>(this.azureMobileService.CategoryTable, "allCategories");
 
-			return await this.azureMobileService.CategoryTable.OrderBy(x => x.Name).ToEnumerableAsync();
+			return await this.azureMobileService.CategoryTable.OrderBy(x => x.Name).ToListAsync();
 		}
 
 		/// <summary>

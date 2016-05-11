@@ -42,9 +42,9 @@ namespace BudgetTracker
 			}
 		}
 
-		public async Task<IEnumerable<Category>> RetrieveCategories() {
+		public async Task<IList<Category>> RetrieveCategories() {
 			// TODO: since I am using a static list, I need to clone it so that deletions to the consumed list do not affect this list
-			return await Task.Run(() => this.CloneList(categories).AsEnumerable());
+			return await Task.Run(() => this.CloneList(categories));
 		}
 
 		public async Task<Category> RetrieveCategoryByName(string name) {

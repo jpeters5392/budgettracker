@@ -27,4 +27,7 @@
 	<string name="categoryDeleted">Category Deleted</string>
 	<string name="confirmDeleteTitle">Confirm Delete</string>
 	<string name="confirmDeleteMessage">Are you sure that you want to delete this?</string>
+  <string name="go">Go</string>
+  <string name="emptyCategories">You do not have any categories, click Go to add categories</string>
+  <string name="missingCategories">Missing Categories</string>
 </resources>

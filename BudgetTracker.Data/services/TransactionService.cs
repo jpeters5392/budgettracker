@@ -29,12 +29,12 @@ namespace BudgetTracker.Data
 			return await this.azureMobileService.SyncTable<Transaction>(this.azureMobileService.TransactionTable, "allTransactions");
 		}
 
-		public async Task<IEnumerable<Transaction>> RetrieveTransactions()
+		public async Task<IList<Transaction>> RetrieveTransactions()
 		{
 			// attempt to sync
 			await this.azureMobileService.SyncTable<Transaction>(this.azureMobileService.TransactionTable, "allTransactions");
 
-			return await this.azureMobileService.TransactionTable.OrderBy(x => x.Vendor).ToEnumerableAsync();
+			return await this.azureMobileService.TransactionTable.OrderBy(x => x.Vendor).ToListAsync();
 		}
 	}
 }
