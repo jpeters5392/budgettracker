@@ -6,6 +6,7 @@ using Android.Widget;
 using System.Collections.Generic;
 using Android.Support.Design.Widget;
 using SharedPCL;
+using SharedPCL.models;
 
 namespace BudgetTracker
 {
@@ -15,8 +16,8 @@ namespace BudgetTracker
 	public class CategoriesAdapter : RecyclerView.Adapter
 	{
 		private IList<Category> categories;
-		private InputUtilities inputUtilities;
-		private CategoryType[] categoryTypes;
+        private IList<CategoryType> categoryTypes;
+        private InputUtilities inputUtilities;
 		private string[] categoryTypeNames;
 		private RecyclerView recyclerView;
 		private readonly ICategoryService categoryService;
@@ -27,11 +28,11 @@ namespace BudgetTracker
 		/// <param name="categoryService">An instance of the category service service.</param>
 		/// <param name="categoryTypeService">An instance of the category type service.</param>
 		/// <param name="inputUtilities">An instance of input utilities.</param>
-		public CategoriesAdapter (ICategoryService categoryService, CategoryTypeService categoryTypeService, InputUtilities inputUtilities)
+		public CategoriesAdapter (ICategoryService categoryService, ICategoryTypeService categoryTypeService, InputUtilities inputUtilities)
 		{
 			this.categories = new List<Category>();
 			this.categoryService = categoryService;
-			this.categoryTypes = categoryTypeService.RetrieveCategoryTypes ();
+			this.categoryTypes = new List<CategoryType>();
 			this.categoryTypeNames = this.categoryTypes.Select (x => Enum.GetName(typeof(CategoryType), x)).ToArray();
 			this.inputUtilities = inputUtilities;
 		}
@@ -52,8 +53,8 @@ namespace BudgetTracker
 			}
 		}
 
-		#region Overrides
-		public override RecyclerView.ViewHolder OnCreateViewHolder (ViewGroup parent, int viewType)
+        #region Overrides
+        public override RecyclerView.ViewHolder OnCreateViewHolder (ViewGroup parent, int viewType)
 		{
 			// set the view's size, margins, paddings and layout parameters
 			View v = LayoutInflater.From(parent.Context).Inflate(Resource.Layout.CategoryListItem, parent, false);

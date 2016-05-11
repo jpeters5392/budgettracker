@@ -8,10 +8,11 @@ using Android.Support.Design.Widget;
 using SharedPCL;
 using System.Collections.Generic;
 using Android.Support.V7.App;
+using TinyIoC;
 
 namespace BudgetTracker
 {
-	public class TransactionEntryFragment : Android.App.Fragment
+	public class TransactionEntryFragment : Android.Support.V4.App.Fragment
 	{
 		private const string FragmentTag = "TransactionEntryFragment";
 		private ITransactionService transactionService;
@@ -30,6 +31,13 @@ namespace BudgetTracker
 		private IList<Category> categories;
 		private IList<string> categoryNames;
 		private readonly ILog log;
+
+        public TransactionEntryFragment() : this(TinyIoCContainer.Current.Resolve<ITransactionService>(), 
+            TinyIoCContainer.Current.Resolve<ICategoryService>(), 
+            TinyIoCContainer.Current.Resolve<InputUtilities>(), 
+            TinyIoCContainer.Current.Resolve<ILog>())
+        {
+        }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="T:BudgetTracker.TransactionEntryFragment"/> class.
@@ -73,6 +81,8 @@ namespace BudgetTracker
 			// remove the focus from the edittext
 			this.transactionAmount.ClearFocus ();
 
+            this.Activity.Title = this.Activity.GetString(Resource.String.transactionEntry);
+
 			return view;
 		}
 
@@ -97,10 +107,9 @@ namespace BudgetTracker
                        .SetMessage(Resource.String.emptyCategories)
                        .SetPositiveButton(Resource.String.go, delegate {
                            //TODO: Find a better way to handle managing the fragments.
-                           //TODO: IoC would be really helpful here
+                           var fragment = new CategoriesFragment();
                            var fragment = new CategoriesFragment(this.categoryService, new CategoryTypeService(), this.inputUtilities, this.log);
                            this.FragmentManager.BeginTransaction().Replace(Resource.Id.frameLayout, fragment).AddToBackStack(null).Commit();
-                           this.Activity.Title = this.GetString(MainActivity.titleResources[1]);
                        });
 
                     builder.Create().Show();
@@ -232,13 +241,11 @@ namespace BudgetTracker
             {
                 if (!validations[0])
                 {
-                    // they do not have a vendor
                     this.transactionVendor.RequestFocus();
                     this.inputUtilities.ShowKeyboard(this.transactionVendor);
                 }
                 else if (!validations[1])
                 {
-                    // they do not have an amount
                     this.transactionAmount.RequestFocus();
                     this.inputUtilities.ShowKeyboard(this.transactionAmount);
                 }

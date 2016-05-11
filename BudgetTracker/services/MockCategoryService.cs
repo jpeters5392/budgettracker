@@ -8,7 +8,7 @@ namespace BudgetTracker
 {
 	public class MockCategoryService : ICategoryService
 	{
-		private static List<Category> categories = null;
+		private static List<Category> categories = new List<Category>();
 
 		public MockCategoryService ()
 		{
