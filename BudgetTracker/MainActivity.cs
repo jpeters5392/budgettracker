@@ -16,7 +16,7 @@ namespace BudgetTracker
 		private DrawerLayout drawerLayout;
 		private NavigationView navigationView;
 
-		private readonly int[] titleResources = new int[] { Resource.String.transactionEntry, Resource.String.categories, Resource.String.reports };
+		internal static readonly int[] titleResources = new int[] { Resource.String.transactionEntry, Resource.String.categories, Resource.String.reports };
 
 		private int currentNavigationItem = 0;
 		private const string SelectedNavigationIndex = "SelectedNavigationIndex";
@@ -161,7 +161,7 @@ namespace BudgetTracker
 		/// <param name="index">The fragment index.</param>
 		private void SetFragment(Fragment fragment, int index)
 		{
-			this.FragmentManager.BeginTransaction ().Replace (Resource.Id.frameLayout, fragment).Commit ();
+			this.FragmentManager.BeginTransaction ().Replace (Resource.Id.frameLayout, fragment).AddToBackStack(null).Commit ();
 			this.Title = this.FindTitle(index);
 		}
 
@@ -172,7 +172,7 @@ namespace BudgetTracker
 		/// <param name="index">The index to be used in the list of titles.</param>
 		private string FindTitle(int index)
 		{
-			return GetString(this.titleResources[this.currentNavigationItem]);
+			return GetString(MainActivity.titleResources[this.currentNavigationItem]);
 		}
 	}
 }

@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BudgetTracker", "BudgetTracker\BudgetTracker.csproj", "{C39D5689-B686-4575-88EE-871611B6413E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedPCL", "SharedPCL\SharedPCL.csproj", "{8A671289-B506-4AB7-8E5D-963025979446}"
@@ -15,6 +17,7 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C39D5689-B686-4575-88EE-871611B6413E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C39D5689-B686-4575-88EE-871611B6413E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C39D5689-B686-4575-88EE-871611B6413E}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{C39D5689-B686-4575-88EE-871611B6413E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C39D5689-B686-4575-88EE-871611B6413E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8A671289-B506-4AB7-8E5D-963025979446}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -25,5 +28,8 @@ Global
 		{C9914AC9-7F1C-4043-806C-86D0A9C03A9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C9914AC9-7F1C-4043-806C-86D0A9C03A9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C9914AC9-7F1C-4043-806C-86D0A9C03A9E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

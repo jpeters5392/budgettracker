@@ -7,6 +7,7 @@ using Android.Support.V7.Widget;
 using Android.Support.Design.Widget;
 using SharedPCL;
 using System.Collections.Generic;
+using Android.Support.V7.App;
 
 namespace BudgetTracker
 {
@@ -26,7 +27,7 @@ namespace BudgetTracker
 		private TextInputLayout amountInputLayout;
 		private TextInputLayout vendorInputLayout;
 		private ArrayAdapter categoriesAdapter;
-		private IEnumerable<Category> categories;
+		private IList<Category> categories;
 		private IList<string> categoryNames;
 		private readonly ILog log;
 
@@ -88,9 +89,28 @@ namespace BudgetTracker
 				await this.transactionService.InitializeService();
 
 				this.categories = await this.categoryService.RetrieveCategories();
-				this.categoryNames = categories.Select(x => x.Name).ToList();
-				this.categoriesAdapter = new ArrayAdapter<string>(this.Activity, Resource.Layout.support_simple_spinner_dropdown_item, this.categoryNames);
-				this.categorySpinner.Adapter = categoriesAdapter;
+                if (this.categories.Count == 0)
+                {
+                    // we need to alert them and take them to the categories fragment
+                    var builder = new AlertDialog.Builder(this.Activity);
+                    builder.SetTitle(Resource.String.missingCategories)
+                       .SetMessage(Resource.String.emptyCategories)
+                       .SetPositiveButton(Resource.String.go, delegate {
+                           //TODO: Find a better way to handle managing the fragments.
+                           //TODO: IoC would be really helpful here
+                           var fragment = new CategoriesFragment(this.categoryService, new CategoryTypeService(), this.inputUtilities, this.log);
+                           this.FragmentManager.BeginTransaction().Replace(Resource.Id.frameLayout, fragment).AddToBackStack(null).Commit();
+                           this.Activity.Title = this.GetString(MainActivity.titleResources[1]);
+                       });
+
+                    builder.Create().Show();
+                }
+                else
+                {
+                    this.categoryNames = categories.Select(x => x.Name).ToList();
+                    this.categoriesAdapter = new ArrayAdapter<string>(this.Activity, Resource.Layout.support_simple_spinner_dropdown_item, this.categoryNames);
+                    this.categorySpinner.Adapter = categoriesAdapter;
+                }
 
 				// run this on the UI thread so that it can be updated
 				//this.Activity.RunOnUiThread(() => this.categorySpinner.Adapter = categoriesAdapter);
@@ -208,6 +228,21 @@ namespace BudgetTracker
 					toast.Show();
 				}
 			}
+            else
+            {
+                if (!validations[0])
+                {
+                    // they failed to validate the vendor
+                    this.transactionVendor.RequestFocus();
+                    this.inputUtilities.ShowKeyboard(this.transactionVendor);
+                }
+                else if (!validations[1])
+                {
+                    // they failed to validate the amount
+                    this.transactionAmount.RequestFocus();
+                    this.inputUtilities.ShowKeyboard(this.transactionAmount);
+                }
+            }
 		}
 
 		/// <summary>
@@ -224,8 +259,6 @@ namespace BudgetTracker
 			} else {
 				this.amountInputLayout.Error = this.Activity.GetString(Resource.String.transactionIncorrectFormat);
 				this.amountInputLayout.ErrorEnabled = true;
-				this.transactionAmount.RequestFocus ();
-				this.inputUtilities.ShowKeyboard (this.transactionAmount);
 				return false;
 			}
 		}
@@ -238,8 +271,6 @@ namespace BudgetTracker
 			if (string.IsNullOrWhiteSpace(this.transactionVendor.Text)) {
 				this.vendorInputLayout.Error = this.Activity.GetString(Resource.String.vendorRequired);
 				this.vendorInputLayout.ErrorEnabled = true;
-				this.transactionVendor.RequestFocus ();
-				this.inputUtilities.ShowKeyboard (this.transactionVendor);
 				return false;
 			} else {
 				this.vendorInputLayout.Error = string.Empty;

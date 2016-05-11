@@ -9,7 +9,7 @@ namespace SharedPCL
 	{
 		Task InitializeService();
 		Task<bool> Insert(Transaction transaction);
-		Task<IEnumerable<Transaction>> RetrieveTransactions();
+		Task<IList<Transaction>> RetrieveTransactions();
 	}
 }
 
