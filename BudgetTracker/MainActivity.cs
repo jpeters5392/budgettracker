@@ -21,24 +21,16 @@ namespace BudgetTracker
 		private const string SelectedNavigationIndex = "SelectedNavigationIndex";
 		private InputUtilities inputUtilities;
 		//private const string AzureUrlSettingName = "azureUrl";
-		private ICategoryService categoryService;
-        private ICategoryTypeService categoryTypeService;
-		private ITransactionService transactionService;
-		private ILog log;
 
 		#region Overrides
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
-            this.log = new Log();
-            this.categoryService = new MockCategoryService();
-            this.transactionService = new MockTransactionService();
             this.inputUtilities = new InputUtilities();
-            this.categoryTypeService = new MockCategoryTypeService();
 
-            TinyIoCContainer.Current.Register<ILog>(this.log);
-            TinyIoCContainer.Current.Register<ICategoryService>(this.categoryService);
-            TinyIoCContainer.Current.Register<ICategoryTypeService>(this.categoryTypeService);
-            TinyIoCContainer.Current.Register<ITransactionService>(this.transactionService);
+            TinyIoCContainer.Current.Register<ILog>(new Log());
+            TinyIoCContainer.Current.Register<ICategoryService>(new MockCategoryService());
+            TinyIoCContainer.Current.Register<ICategoryTypeService>(new MockCategoryTypeService());
+            TinyIoCContainer.Current.Register<ITransactionService>(new MockTransactionService());
             TinyIoCContainer.Current.Register<InputUtilities>(this.inputUtilities);
 
             base.OnCreate (savedInstanceState);
