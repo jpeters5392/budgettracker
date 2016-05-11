@@ -9,6 +9,7 @@ using BudgetTracker.Data;
 using SharedPCL;
 using SharedPCL.models;
 using TinyIoC;
+using Plugin.Connectivity.Abstractions;
 
 namespace BudgetTracker
 {
@@ -29,18 +30,23 @@ namespace BudgetTracker
 		{
             this.inputUtilities = new InputUtilities();
 
-            TinyIoCContainer.Current.Register<ILog>(new Log());
-            TinyIoCContainer.Current.Register<ICategoryService>(new MockCategoryService());
+            var logger = new Log();
+            TinyIoCContainer.Current.Register<ILog>(logger);
             TinyIoCContainer.Current.Register<ICategoryTypeService>(new MockCategoryTypeService());
-            TinyIoCContainer.Current.Register<ITransactionService>(new MockTransactionService());
             TinyIoCContainer.Current.Register<InputUtilities>(this.inputUtilities);
-			
-			// connect to Azure
-			Microsoft.WindowsAzure.MobileServices.CurrentPlatform.Init();
+            TinyIoCContainer.Current.Register<IConnectivity>(Plugin.Connectivity.CrossConnectivity.Current);
+
+            // connect to Azure
+            Microsoft.WindowsAzure.MobileServices.CurrentPlatform.Init();
 
 			// leaving this here for people who want to try to integrate this with Azure.
 			var activityMetadata = this.PackageManager.GetActivityInfo(this.ComponentName, Android.Content.PM.PackageInfoFlags.Activities|Android.Content.PM.PackageInfoFlags.MetaData).MetaData;
 			var azureUrl = activityMetadata.GetString(AzureUrlSettingName);
+            var azureMobileService = new AzureMobileService(azureUrl, logger, Plugin.Connectivity.CrossConnectivity.Current);
+
+            TinyIoCContainer.Current.Register<IAzureMobileService>(azureMobileService);
+            TinyIoCContainer.Current.Register<ICategoryService>(new CategoryService(azureMobileService, logger));
+            TinyIoCContainer.Current.Register<ITransactionService>(new TransactionService(azureMobileService, logger));
 
             base.OnCreate (savedInstanceState);
 
