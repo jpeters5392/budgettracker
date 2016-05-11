@@ -6,6 +6,8 @@ using Android.Support.V7.App;
 using Android.Support.Design.Widget;
 using Android.Support.V4.View;
 using SharedPCL;
+using SharedPCL.models;
+using TinyIoC;
 
 namespace BudgetTracker
 {
@@ -16,20 +18,30 @@ namespace BudgetTracker
 		private DrawerLayout drawerLayout;
 		private NavigationView navigationView;
 
-		internal static readonly int[] titleResources = new int[] { Resource.String.transactionEntry, Resource.String.categories, Resource.String.reports };
-
-		private int currentNavigationItem = 0;
 		private const string SelectedNavigationIndex = "SelectedNavigationIndex";
 		private InputUtilities inputUtilities;
 		//private const string AzureUrlSettingName = "azureUrl";
 		private ICategoryService categoryService;
+        private ICategoryTypeService categoryTypeService;
 		private ITransactionService transactionService;
 		private ILog log;
 
 		#region Overrides
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
-			base.OnCreate (savedInstanceState);
+            this.log = new Log();
+            this.categoryService = new MockCategoryService();
+            this.transactionService = new MockTransactionService();
+            this.inputUtilities = new InputUtilities();
+            this.categoryTypeService = new MockCategoryTypeService();
+
+            TinyIoCContainer.Current.Register<ILog>(this.log);
+            TinyIoCContainer.Current.Register<ICategoryService>(this.categoryService);
+            TinyIoCContainer.Current.Register<ICategoryTypeService>(this.categoryTypeService);
+            TinyIoCContainer.Current.Register<ITransactionService>(this.transactionService);
+            TinyIoCContainer.Current.Register<InputUtilities>(this.inputUtilities);
+
+            base.OnCreate (savedInstanceState);
 
 			// connect to Azure
 			// Microsoft.WindowsAzure.MobileServices.CurrentPlatform.Init();
@@ -38,13 +50,8 @@ namespace BudgetTracker
 			//var activityMetadata = this.PackageManager.GetActivityInfo(this.ComponentName, Android.Content.PM.PackageInfoFlags.Activities|Android.Content.PM.PackageInfoFlags.MetaData).MetaData;
 			//var azureUrl = activityMetadata.GetString(AzureUrlSettingName);
 
-			this.log = new Log();
-			this.categoryService = new MockCategoryService();
-			this.transactionService = new MockTransactionService();
-			this.inputUtilities = new InputUtilities();
-
-			// Set our view from the "main" layout resource
-			SetContentView (Resource.Layout.Main);
+            // Set our view from the "main" layout resource
+            SetContentView (Resource.Layout.Main);
 
 			// Set the v7 toolbar to be the view's action bar
 			var toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
@@ -64,20 +71,9 @@ namespace BudgetTracker
 			this.navigationView.NavigationItemSelected += this.NavigateToItem;
 
 			// set the transactions fragment to be displayed by default
-			if (savedInstanceState != null) {
-				// we just need to set the title, but not the fragment
-				this.currentNavigationItem = savedInstanceState.GetInt(SelectedNavigationIndex);
-				this.Title = this.FindTitle(this.currentNavigationItem);
-			} else {
-				this.SetFragment (new TransactionEntryFragment (this.transactionService, this.categoryService, this.inputUtilities, this.log), 0);
+			if (savedInstanceState == null) {
+				this.SetFragment (new TransactionEntryFragment());
 			}
-		}
-
-		protected override void OnSaveInstanceState (Bundle outState)
-		{
-			base.OnSaveInstanceState (outState);
-
-			outState.PutInt (SelectedNavigationIndex, this.currentNavigationItem); 
 		}
 
 		protected override void OnDestroy ()
@@ -119,37 +115,34 @@ namespace BudgetTracker
 
 			return base.OnOptionsItemSelected(item);
 		}
-		#endregion
+        #endregion
 
-		/// <summary>
-		/// Navigates to the selected fragment.
-		/// </summary>
-		/// <param name="sender">Sender.</param>
-		/// <param name="e">E.</param>
-		protected void NavigateToItem(object sender, NavigationView.NavigationItemSelectedEventArgs e)
+        /// <summary>
+        /// Navigates to the selected fragment.
+        /// </summary>
+        /// <param name="sender">Sender.</param>
+        /// <param name="e">E.</param>
+        protected void NavigateToItem(object sender, NavigationView.NavigationItemSelectedEventArgs e)
 		{
 			e.MenuItem.SetChecked (true);
 
-			Fragment fragment = null;
+            Android.Support.V4.App.Fragment fragment = null;
 
 			switch (e.MenuItem.ItemId)
 			{
 				case Resource.Id.nav_reports:
-					fragment = new ReportsFragment (this.transactionService, this.categoryService, this.log);
-					this.currentNavigationItem = 2;
+					fragment = new ReportsFragment ();
 					break;
 				case Resource.Id.nav_categories:
-				fragment = new CategoriesFragment (this.categoryService, new CategoryTypeService (), this.inputUtilities, this.log);
-					this.currentNavigationItem = 1;
+				    fragment = new CategoriesFragment ();
 					break;
 				case Resource.Id.nav_transactions:
 				default:
-				fragment = new TransactionEntryFragment (this.transactionService, this.categoryService, this.inputUtilities, this.log);
-					this.currentNavigationItem = 0;
+				    fragment = new TransactionEntryFragment ();
 					break;
 			}
 
-			this.SetFragment (fragment, this.currentNavigationItem);
+			this.SetFragment (fragment);
 
 			drawerLayout.CloseDrawers ();
 		}
@@ -158,21 +151,9 @@ namespace BudgetTracker
 		/// Sets the currently displayed fragment.
 		/// </summary>
 		/// <param name="fragment">The fragment.</param>
-		/// <param name="index">The fragment index.</param>
-		private void SetFragment(Fragment fragment, int index)
+		private void SetFragment(Android.Support.V4.App.Fragment fragment)
 		{
-			this.FragmentManager.BeginTransaction ().Replace (Resource.Id.frameLayout, fragment).AddToBackStack(null).Commit ();
-			this.Title = this.FindTitle(index);
-		}
-
-		/// <summary>
-		/// Retrieves the title that should be used given the current fragment index.
-		/// </summary>
-		/// <returns>The title.</returns>
-		/// <param name="index">The index to be used in the list of titles.</param>
-		private string FindTitle(int index)
-		{
-			return GetString(MainActivity.titleResources[this.currentNavigationItem]);
+			this.SupportFragmentManager.BeginTransaction ().Replace (Resource.Id.frameLayout, fragment).AddToBackStack(null).Commit ();
 		}
 	}
 }

@@ -8,33 +8,42 @@ using SharedPCL;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using TinyIoC;
+using SharedPCL.models;
 
 namespace BudgetTracker
 {
 	/// <summary>
 	/// Categories fragment.
 	/// </summary>
-	public class CategoriesFragment : Android.App.Fragment
+	public class CategoriesFragment : Android.Support.V4.App.Fragment
 	{
 		private const string FragmentTag = "CategoriesFragment";
 		private RecyclerView categoriesRecyclerView;
 		private FloatingActionButton fab;
 
 		private ICategoryService categoryService;
-		private CategoryTypeService categoryTypeService;
+		private ICategoryTypeService categoryTypeService;
 		private InputUtilities inputUtilities;
 		private CategoriesAdapter categoriesAdapter;
 		private IEnumerable<Category> categories;
 		private readonly ILog log;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="T:BudgetTracker.CategoriesFragment"/> class.
-		/// </summary>
-		/// <param name="categoryService">An instance of the category service.</param>
-		/// <param name="categoryTypeService">An instance of the category type service.</param>
-		/// <param name="inputUtilities">An instance of input utilities.</param>
-		/// <param name="log">An instance of a logger.</param>
-		public CategoriesFragment (ICategoryService categoryService, CategoryTypeService categoryTypeService, InputUtilities inputUtilities, ILog log)
+        public CategoriesFragment() : this(TinyIoCContainer.Current.Resolve<ICategoryService>(), 
+            TinyIoCContainer.Current.Resolve<ICategoryTypeService>(),
+            TinyIoCContainer.Current.Resolve<InputUtilities>(),
+            TinyIoCContainer.Current.Resolve<ILog>())
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:BudgetTracker.CategoriesFragment"/> class.
+        /// </summary>
+        /// <param name="categoryService">An instance of the category service.</param>
+        /// <param name="categoryTypeService">An instance of the category type service.</param>
+        /// <param name="inputUtilities">An instance of input utilities.</param>
+        /// <param name="log">An instance of a logger.</param>
+        public CategoriesFragment (ICategoryService categoryService, ICategoryTypeService categoryTypeService, InputUtilities inputUtilities, ILog log)
 		{
 			this.categoryService = categoryService;
 			this.categoryTypeService = categoryTypeService;
@@ -60,7 +69,9 @@ namespace BudgetTracker
 
 			categoriesRecyclerView.SetAdapter (categoriesAdapter);
 
-			return view;
+            this.Activity.Title = this.Activity.GetString(Resource.String.categories);
+
+            return view;
 		}
 
 		public async override void OnResume()
