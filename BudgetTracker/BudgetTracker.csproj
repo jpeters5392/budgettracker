@@ -78,15 +78,12 @@
     <Compile Include="adapters\CategoriesAdapter.cs" />
     <Compile Include="TinyIoC.cs" />
     <Compile Include="viewHolders\CategoryViewHolder.cs" />
-    <Compile Include="services\MockCategoryTypeService.cs" />
     <Compile Include="models\IdTag.cs" />
     <Compile Include="utilities\InputUtilities.cs" />
     <Compile Include="models\ItemDeletedEventArgs.cs" />
     <Compile Include="utilities\SnackbarCallback.cs" />
     <Compile Include="fragments\TransactionEntryFragment.cs" />
     <Compile Include="utilities\Log.cs" />
-    <Compile Include="services\MockCategoryService.cs" />
-    <Compile Include="services\MockTransactionService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
