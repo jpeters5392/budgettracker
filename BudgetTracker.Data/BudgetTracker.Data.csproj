@@ -32,11 +32,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Folder Include="services\" />
+    <Compile Include="services\MockCategoryService.cs" />
+    <Compile Include="services\MockCategoryTypeService.cs" />
+    <Compile Include="services\MockTransactionService.cs" />
     <Compile Include="services\AzureMobileService.cs" />
     <Compile Include="services\CategoryService.cs" />
     <Compile Include="services\IAzureMobileService.cs" />
     <Compile Include="services\TransactionService.cs" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\SharedPCL\SharedPCL.csproj">
       <Project>{8A671289-B506-4AB7-8E5D-963025979446}</Project>
