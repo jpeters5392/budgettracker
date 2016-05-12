@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6211" systemVersion="14A298i" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="49e-Tb-3d3">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6204"/>
+    </dependencies>
+    <scenes>
+        <!--First-->
+        <!--Second-->
+        <!--Tab Bar Controller-->
+        <scene sceneID="yl2-sM-qoP">
+            <objects>
+                <tabBarController id="49e-Tb-3d3" sceneMemberID="viewController">
+                    <nil key="simulatedBottomBarMetrics"/>
+                    <tabBar key="tabBar" contentMode="scaleToFill" id="W28-zg-YXA">
+                        <rect key="frame" x="0.0" y="551" width="600" height="49"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    </tabBar>
+                    <connections>
+                        <segue id="210" destination="8" kind="relationship" relationship="viewControllers"/>
+                        <segue id="558" destination="372" kind="relationship" relationship="viewControllers"/>
+                    </connections>
+                </tabBarController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="HuB-VB-40B" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="86" y="16"/>
+        </scene>
+        <scene sceneID="7">
+            <objects>
+                <viewController id="8" sceneMemberID="viewController" title="Transaction Entry" customClass="TransactionEntryViewController" storyboardIdentifier="TransactionEntryViewController" useStoryboardIdentifierAsRestorationIdentifier="YES">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="5"/>
+                        <viewControllerLayoutGuide type="bottom" id="6"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="9">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <subviews>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" id="562" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES" placeholder="Vendor">
+                                <rect key="frame" x="27" y="79" width="97" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" id="563" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES" placeholder="Amount">
+                                <rect key="frame" x="27" y="151" width="97" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
+                            </textField>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" id="564" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES" placeholder="Description">
+                                <rect key="frame" x="27" y="231" width="97" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <pickerView contentMode="scaleToFill" id="565" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
+                                <rect key="frame" x="74" y="275" width="320" height="162"/>
+                            </pickerView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="566" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
+                                <rect key="frame" x="27" y="484" width="46" height="30"/>
+                                <state key="normal" title="Save">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                            </button>
+                        </subviews>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Transaction Entry" id="209"/>
+                    <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <outlet property="CategoryPicker" destination="565" id="name-outlet-565"/>
+                        <outlet property="Description" destination="564" id="name-outlet-564"/>
+                        <outlet property="Amount" destination="563" id="name-outlet-563"/>
+                        <outlet property="Vendor" destination="562" id="name-outlet-562"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="10" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="810" y="-116"/>
+        </scene>
+        <scene sceneID="371">
+            <objects>
+                <viewController id="372" sceneMemberID="viewController" title="Categories" useStoryboardIdentifierAsRestorationIdentifier="YES" storyboardIdentifier="Categories" customClass="CategoryViewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="369"/>
+                        <viewControllerLayoutGuide type="bottom" id="370"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="373">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Categories" id="557"/>
+                    <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="374" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="814" y="539"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="First" width="30" height="30"/>
+        <image name="Second" width="30" height="30"/>
+    </resources>
+</document>
