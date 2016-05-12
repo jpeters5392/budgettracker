@@ -13,6 +13,14 @@ namespace BudgetTracker.iPhone.ViewModels
 			this.categories = categories;
 		}
 
+		public IList<Category> Items
+		{
+			get
+			{
+				return categories;
+			}
+		}
+
 		public override nint GetComponentCount(UIPickerView pickerView)
 		{
 			return 1;
@@ -25,7 +33,7 @@ namespace BudgetTracker.iPhone.ViewModels
 
 		public override string GetTitle(UIPickerView pickerView, nint row, nint component)
 		{
-			return this.categories[Convert.ToInt32(component)].Name;
+			return this.categories[Convert.ToInt32(row)].Name;
 		}
 	}
 }

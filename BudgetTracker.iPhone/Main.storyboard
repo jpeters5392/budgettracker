@@ -53,13 +53,14 @@
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <pickerView contentMode="scaleToFill" id="565" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
-                                <rect key="frame" x="74" y="275" width="320" height="162"/>
+                                <rect key="frame" x="0.0" y="272" width="196" height="162"/>
                             </pickerView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="566" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
                                 <rect key="frame" x="27" y="484" width="46" height="30"/>
                                 <state key="normal" title="Save">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
+                                <connections/>
                             </button>
                         </subviews>
                     </view>
@@ -70,6 +71,7 @@
                         <outlet property="Description" destination="564" id="name-outlet-564"/>
                         <outlet property="Amount" destination="563" id="name-outlet-563"/>
                         <outlet property="Vendor" destination="562" id="name-outlet-562"/>
+                        <outlet property="SaveButton" destination="566" id="name-outlet-566"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="10" userLabel="First Responder" sceneMemberID="firstResponder"/>

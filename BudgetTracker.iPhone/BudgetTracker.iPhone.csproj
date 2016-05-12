@@ -128,6 +128,10 @@
     <Content Include="Entitlements.plist" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BudgetTracker.Data\BudgetTracker.Data.csproj">
+      <Project>{C9914AC9-7F1C-4043-806C-86D0A9C03A9E}</Project>
+      <Name>BudgetTracker.Data</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SharedPCL\SharedPCL.csproj">
       <Project>{8a671289-b506-4ab7-8e5d-963025979446}</Project>
       <Name>SharedPCL</Name>

@@ -28,6 +28,10 @@ namespace BudgetTracker.iPhone
 
 		[Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
+		UIButton SaveButton { get; set; }
+
+		[Outlet]
+		[GeneratedCode ("iOS Designer", "1.0")]
 		UITextField Vendor { get; set; }
 
 		void ReleaseDesignerOutlets ()
@@ -43,6 +47,10 @@ namespace BudgetTracker.iPhone
 			if (Description != null) {
 				Description.Dispose ();
 				Description = null;
+			}
+			if (SaveButton != null) {
+				SaveButton.Dispose ();
+				SaveButton = null;
 			}
 			if (Vendor != null) {
 				Vendor.Dispose ();
