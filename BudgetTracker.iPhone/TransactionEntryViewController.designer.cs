@@ -20,7 +20,7 @@ namespace BudgetTracker.iPhone
 
 		[Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
-		UIPickerView CategoryPicker { get; set; }
+		UITextField CategoryField { get; set; }
 
 		[Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
@@ -40,9 +40,9 @@ namespace BudgetTracker.iPhone
 				Amount.Dispose ();
 				Amount = null;
 			}
-			if (CategoryPicker != null) {
-				CategoryPicker.Dispose ();
-				CategoryPicker = null;
+			if (CategoryField != null) {
+				CategoryField.Dispose ();
+				CategoryField = null;
 			}
 			if (Description != null) {
 				Description.Dispose ();

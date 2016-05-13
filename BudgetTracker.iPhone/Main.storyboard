@@ -37,41 +37,43 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <subviews>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" id="562" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES" placeholder="Vendor">
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" id="562" translatesAutoresizingMaskIntoConstraints="NO" placeholder="Vendor" fixedFrame="YES">
                                 <rect key="frame" x="27" y="79" width="97" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" id="563" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES" placeholder="Amount">
-                                <rect key="frame" x="27" y="151" width="97" height="30"/>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" id="563" translatesAutoresizingMaskIntoConstraints="NO" placeholder="Amount" fixedFrame="YES">
+                                <rect key="frame" x="27" y="117" width="97" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
                             </textField>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" id="564" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES" placeholder="Description">
-                                <rect key="frame" x="27" y="231" width="97" height="30"/>
+                                <rect key="frame" x="27" y="155" width="97" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <pickerView contentMode="scaleToFill" id="565" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
-                                <rect key="frame" x="0.0" y="272" width="196" height="162"/>
-                            </pickerView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="566" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
-                                <rect key="frame" x="27" y="484" width="46" height="30"/>
+                                <rect key="frame" x="20" y="231" width="46" height="30"/>
                                 <state key="normal" title="Save">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections/>
                             </button>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" id="575" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES" placeholder="Category">
+                                <rect key="frame" x="27" y="193" width="97" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
                         </subviews>
                     </view>
                     <tabBarItem key="tabBarItem" title="Transaction Entry" id="209"/>
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
-                        <outlet property="CategoryPicker" destination="565" id="name-outlet-565"/>
                         <outlet property="Description" destination="564" id="name-outlet-564"/>
                         <outlet property="Amount" destination="563" id="name-outlet-563"/>
                         <outlet property="Vendor" destination="562" id="name-outlet-562"/>
                         <outlet property="SaveButton" destination="566" id="name-outlet-566"/>
+                        <outlet property="CategoryField" destination="575" id="name-outlet-575"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="10" userLabel="First Responder" sceneMemberID="firstResponder"/>
