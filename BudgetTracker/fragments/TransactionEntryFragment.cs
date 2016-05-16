@@ -75,7 +75,7 @@ namespace BudgetTracker
 
 			this.categorySpinner = view.FindViewById<AppCompatSpinner> (Resource.Id.categorySpinner);
 			this.categories = new List<Category>();
-			this.categoryNames = categories.Select (x => x.Name).ToList();
+			this.categoryNames = categories.Select (x => x.DisplayName).ToList();
 			this.categoriesAdapter = new ArrayAdapter<string> (this.Activity, Resource.Layout.support_simple_spinner_dropdown_item, this.categoryNames);
 			this.categorySpinner.Adapter = categoriesAdapter;
 
@@ -122,7 +122,7 @@ namespace BudgetTracker
                 }
                 else
                 {
-                    this.categoryNames = categories.Select(x => x.Name).ToList();
+                    this.categoryNames = categories.Select(x => x.DisplayName).OrderBy(x => x).ToList();
                     this.categoriesAdapter = new ArrayAdapter<string>(this.Activity, Resource.Layout.support_simple_spinner_dropdown_item, this.categoryNames);
                     this.categorySpinner.Adapter = categoriesAdapter;
 

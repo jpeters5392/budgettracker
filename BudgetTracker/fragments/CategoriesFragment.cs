@@ -99,7 +99,7 @@ namespace BudgetTracker
 				await this.categoryService.InitializeService();
 
 				this.categories = await this.categoryService.RetrieveCategories();
-				this.categoriesAdapter.Categories = this.categories.ToList();
+				this.categoriesAdapter.Categories = this.categories.OrderBy(x => x.Name).ToList();
 				this.categoriesAdapter.NotifyDataSetChanged();
 
 				// hide the progress bar and show the recycler view
