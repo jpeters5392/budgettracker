@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using TinyIoC;
 using SharedPCL.models;
+using BudgetTracker.Utilities;
 
 namespace BudgetTracker
 {
@@ -21,6 +22,7 @@ namespace BudgetTracker
 		private const string FragmentTag = "CategoriesFragment";
 		private RecyclerView categoriesRecyclerView;
 		private FloatingActionButton fab;
+		private LinearLayout progressLayout;
 
 		private ICategoryService categoryService;
 		private ICategoryTypeService categoryTypeService;
@@ -28,11 +30,13 @@ namespace BudgetTracker
 		private CategoriesAdapter categoriesAdapter;
 		private IList<Category> categories;
 		private readonly ILog log;
+		private FragmentUtilities fragmentUtilities;
 
         public CategoriesFragment() : this(TinyIoCContainer.Current.Resolve<ICategoryService>(), 
             TinyIoCContainer.Current.Resolve<ICategoryTypeService>(),
             TinyIoCContainer.Current.Resolve<InputUtilities>(),
-            TinyIoCContainer.Current.Resolve<ILog>())
+            TinyIoCContainer.Current.Resolve<ILog>(),
+			TinyIoCContainer.Current.Resolve<FragmentUtilities>())
         {
         }
 
@@ -43,33 +47,42 @@ namespace BudgetTracker
         /// <param name="categoryTypeService">An instance of the category type service.</param>
         /// <param name="inputUtilities">An instance of input utilities.</param>
         /// <param name="log">An instance of a logger.</param>
-        public CategoriesFragment (ICategoryService categoryService, ICategoryTypeService categoryTypeService, InputUtilities inputUtilities, ILog log)
+		/// <param name="fragmentUtilities">An instance of fragment utilities.</param>
+        public CategoriesFragment (ICategoryService categoryService, ICategoryTypeService categoryTypeService, InputUtilities inputUtilities, ILog log, FragmentUtilities fragmentUtilities)
 		{
 			this.categoryService = categoryService;
 			this.categoryTypeService = categoryTypeService;
 			this.inputUtilities = inputUtilities;
 			this.log = log;
+			this.fragmentUtilities = fragmentUtilities;
 		}
 
 		public override View OnCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			var view = inflater.Inflate (Resource.Layout.Categories, container, false);
 
-			fab = view.FindViewById<FloatingActionButton> (Resource.Id.fab);
-			fab.Click += AddCategory;
+			// getting view references
+			this.fab = view.FindViewById<FloatingActionButton> (Resource.Id.fab);
+			this.progressLayout = view.FindViewById<LinearLayout>(Resource.Id.progressLayout);
+			this.categoriesRecyclerView = view.FindViewById<RecyclerView> (Resource.Id.categoriesRecyclerView);
 
-			categoriesRecyclerView = view.FindViewById<RecyclerView> (Resource.Id.categoriesRecyclerView);
+			// set up recycler view
 			RecyclerView.LayoutManager categoriesLayoutManager = new LinearLayoutManager (this.Activity);
-			categoriesRecyclerView.SetLayoutManager (categoriesLayoutManager);
+			this.categoriesRecyclerView.SetLayoutManager (categoriesLayoutManager);
 
 			this.categories = new List<Category>();
-
 			this.categoriesAdapter = new CategoriesAdapter (this.categoryService, this.categoryTypeService, this.inputUtilities);
 			this.categoriesAdapter.Categories = this.categories.ToList();
+			this.categoriesRecyclerView.SetAdapter (this.categoriesAdapter);
 
-			categoriesRecyclerView.SetAdapter (categoriesAdapter);
+			// event handling
+			fab.Click += AddCategory;
 
-            this.Activity.Title = this.Activity.GetString(Resource.String.categories);
+			// set the view's title
+			this.Activity.Title = this.Activity.GetString(Resource.String.categories);
+
+			// show the progress bar and hide the recycler view
+			this.categoriesRecyclerView.Visibility = ViewStates.Gone;
 
             return view;
 		}
@@ -88,7 +101,10 @@ namespace BudgetTracker
 				this.categories = await this.categoryService.RetrieveCategories();
 				this.categoriesAdapter.Categories = this.categories.ToList();
 				this.categoriesAdapter.NotifyDataSetChanged();
-				//this.UpdateAdapter();
+
+				// hide the progress bar and show the recycler view
+				this.progressLayout.Visibility = ViewStates.Gone;
+				this.categoriesRecyclerView.Visibility = ViewStates.Visible;
 			}
 			catch (Exception ex)
 			{
@@ -121,19 +137,13 @@ namespace BudgetTracker
 				this.categoriesAdapter = null;
 			}
 
-			base.OnDestroyView ();
-		}
-
-		/// <summary>
-		/// Updates the adapter on the UI thread.
-		/// </summary>
-		public void UpdateAdapter()
-		{
-			if (this.categoriesAdapter != null)
+			if (this.progressLayout != null)
 			{
-				// this must run on the UI thread in order for the data to update
-				this.Activity.RunOnUiThread(() => this.categoriesAdapter.NotifyDataSetChanged());
-			}	
+				this.progressLayout.Dispose();
+				this.progressLayout = null;
+			}
+
+			base.OnDestroyView ();
 		}
 
 		/// <summary>
@@ -143,8 +153,7 @@ namespace BudgetTracker
 		/// <param name="e">E.</param>
 		public void AddCategory(object sender, EventArgs e) 
 		{
-			var fragment = new AddCategoryFragment();
-			this.FragmentManager.BeginTransaction().Replace(Resource.Id.frameLayout, fragment).AddToBackStack(null).Commit();
+			this.fragmentUtilities.Transition(new AddCategoryFragment());
 		}
 	}
 }

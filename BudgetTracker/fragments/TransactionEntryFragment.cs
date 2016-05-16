@@ -9,6 +9,7 @@ using SharedPCL;
 using System.Collections.Generic;
 using Android.Support.V7.App;
 using TinyIoC;
+using BudgetTracker.Utilities;
 
 namespace BudgetTracker
 {
@@ -24,6 +25,7 @@ namespace BudgetTracker
 		private EditText transactionVendor;
 		private EditText transactionDescription;
 		private LinearLayout transactionLayout;
+		private LinearLayout progressLayout;
 		private InputUtilities inputUtilities;
 		private TextInputLayout amountInputLayout;
 		private TextInputLayout vendorInputLayout;
@@ -31,11 +33,13 @@ namespace BudgetTracker
 		private IList<Category> categories;
 		private IList<string> categoryNames;
 		private readonly ILog log;
+		private FragmentUtilities fragmentUtilities;
 
         public TransactionEntryFragment() : this(TinyIoCContainer.Current.Resolve<ITransactionService>(), 
             TinyIoCContainer.Current.Resolve<ICategoryService>(), 
             TinyIoCContainer.Current.Resolve<InputUtilities>(), 
-            TinyIoCContainer.Current.Resolve<ILog>())
+            TinyIoCContainer.Current.Resolve<ILog>(),
+			TinyIoCContainer.Current.Resolve<FragmentUtilities>())
         {
         }
 
@@ -46,12 +50,14 @@ namespace BudgetTracker
 		/// <param name="categoryService">An instance of the Category service.</param>
 		/// <param name="inputUtilities">An instance of input utilities.</param>
 		/// <param name="log">An instance of a logger.</param>
-		public TransactionEntryFragment (ITransactionService transactionService, ICategoryService categoryService, InputUtilities inputUtilities, ILog log)
+		/// <param name="fragmentUtilities">An instance of fragment utilities.</param>
+		public TransactionEntryFragment (ITransactionService transactionService, ICategoryService categoryService, InputUtilities inputUtilities, ILog log, FragmentUtilities fragmentUtilities)
 		{
 			this.transactionService = transactionService;
 			this.categoryService = categoryService;
 			this.inputUtilities = inputUtilities;
 			this.log = log;
+			this.fragmentUtilities = fragmentUtilities;
 		}
 
 		#region Overrides
@@ -63,6 +69,7 @@ namespace BudgetTracker
 			this.transactionVendor = view.FindViewById<EditText> (Resource.Id.transactionVendor);
 			this.transactionDescription = view.FindViewById<EditText> (Resource.Id.transactionDescription);
 			this.transactionLayout = view.FindViewById<LinearLayout> (Resource.Id.transactionLayout);
+			this.progressLayout = view.FindViewById<LinearLayout>(Resource.Id.progressLayout);
 			this.amountInputLayout = view.FindViewById<TextInputLayout> (Resource.Id.amountInputLayout);
 			this.vendorInputLayout = view.FindViewById<TextInputLayout> (Resource.Id.vendorInputLayout);
 
@@ -80,6 +87,8 @@ namespace BudgetTracker
 
 			// remove the focus from the edittext
 			this.transactionAmount.ClearFocus ();
+
+			this.transactionLayout.Visibility = ViewStates.Gone;
 
             this.Activity.Title = this.Activity.GetString(Resource.String.transactionEntry);
 
@@ -106,9 +115,7 @@ namespace BudgetTracker
                     builder.SetTitle(Resource.String.missingCategories)
                        .SetMessage(Resource.String.emptyCategories)
                        .SetPositiveButton(Resource.String.go, delegate {
-                           //TODO: Find a better way to handle managing the fragments.
-                           var fragment = new AddCategoryFragment();
-                           this.FragmentManager.BeginTransaction().Replace(Resource.Id.frameLayout, fragment).AddToBackStack(null).Commit();
+						   this.fragmentUtilities.Transition(new AddCategoryFragment());
                        });
 
                     builder.Create().Show();
@@ -118,6 +125,9 @@ namespace BudgetTracker
                     this.categoryNames = categories.Select(x => x.Name).ToList();
                     this.categoriesAdapter = new ArrayAdapter<string>(this.Activity, Resource.Layout.support_simple_spinner_dropdown_item, this.categoryNames);
                     this.categorySpinner.Adapter = categoriesAdapter;
+
+					this.progressLayout.Visibility = ViewStates.Gone;
+					this.transactionLayout.Visibility = ViewStates.Visible;
                 }
 
 				// run this on the UI thread so that it can be updated
@@ -165,6 +175,12 @@ namespace BudgetTracker
 			if (this.transactionLayout != null) {
 				this.transactionLayout.Dispose ();
 				this.transactionLayout = null;
+			}
+
+			if (this.progressLayout != null)
+			{
+				this.progressLayout.Dispose();
+				this.progressLayout = null;
 			}
 
 			if (this.view != null) {

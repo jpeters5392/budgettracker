@@ -1,34 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/transactionLayout"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:paddingTop="16dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:focusableInTouchMode="true">
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:id="@+id/progressLayout"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/vendorInputLayout">
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/transactionVendor"
+        android:layout_centerInParent="true">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:textSize="24sp"
+            android:text="@string/loadingTransactions" />
+        <ProgressBar
+            style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="8dp"
+            android:layout_marginTop="24dp"
+            android:indeterminate="true"
+            android:visibility="visible" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/transactionLayout"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusableInTouchMode="true">
+        <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:nextFocusForward="@+id/transactionAmount"
-            android:nextFocusRight="@+id/transactionAmount"
-            android:hint="@string/transactionVendorHint" />
-    </android.support.design.widget.TextInputLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="0dp">
+            android:id="@+id/vendorInputLayout">
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/transactionVendor"
+                android:layout_gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:nextFocusForward="@+id/transactionAmount"
+                android:nextFocusRight="@+id/transactionAmount"
+                android:nextFocusDown="@+id/transactionAmount"
+                android:nextFocusUp="@+id/categorySpinner"
+                android:nextFocusLeft="@+id/categorySpinner"
+                android:hint="@string/transactionVendorHint"
+                android:contentDescription="@string/transactionVendorHint" />
+        </android.support.design.widget.TextInputLayout>
         <android.support.design.widget.TextInputLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:id="@+id/amountInputLayout">
             <android.support.design.widget.TextInputEditText
                 android:id="@+id/transactionAmount"
@@ -37,45 +59,50 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:nextFocusForward="@+id/categorySpinner"
-                android:nextFocusRight="@+id/categorySpinner"
-                android:nextFocusDown="@+id/categorySpinner"
+                android:nextFocusForward="@+id/transactionDescription"
+                android:nextFocusRight="@+id/transactionDescription"
+                android:nextFocusDown="@+id/transactionDescription"
                 android:nextFocusLeft="@+id/transactionVendor"
-                android:hint="@string/transactionAmountHint" />
+                android:nextFocusUp="@+id/transactionVendor"
+                android:hint="@string/transactionAmountHint"
+                android:contentDescription="@string/transactionAmountHint" />
+        </android.support.design.widget.TextInputLayout>
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/descriptionInputLayout">
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/transactionDescription"
+                android:layout_gravity="center"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:nextFocusForward="@+id/saveButton"
+                android:nextFocusDown="@+id/saveButton"
+                android:nextFocusRight="@+id/saveButton"
+                android:nextFocusLeft="@+id/transactionAmount"
+                android:nextFocusUp="@+id/transactionAmount"
+                android:hint="@string/description"
+                android:contentDescription="@string/description" />
         </android.support.design.widget.TextInputLayout>
         <android.support.v7.widget.AppCompatSpinner
             android:id="@+id/categorySpinner"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:nextFocusForward="@+id/transactionDescription"
-            android:nextFocusDown="@+id/transactionDescription"
-            android:nextFocusRight="@+id/transactionDescription"
-            android:nextFocusLeft="@+id/transactionAmount"
+            android:nextFocusForward="@+id/transactionVendor"
+            android:nextFocusDown="@+id/transactionVendor"
+            android:nextFocusRight="@+id/transactionVendor"
+            android:nextFocusLeft="@+id/saveButton"
+            android:nextFocusUp="@+id/saveButton"
             android:prompt="@string/category_prompt"
+            android:contentDescription="@string/category_prompt"
             android:spinnerMode="dialog" />
+        <Button
+            android:id="@+id/saveButton"
+            android:text="@string/saveTransaction"
+            android:contentDescription="@string/saveTransaction"
+            android:layout_width="match_parent"
+            android:nextFocusLeft="@+id/transactionDescription"
+            android:nextFocusUp="@+id/transactionDescription"
+            android:layout_height="wrap_content" />
     </LinearLayout>
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/descriptionInputLayout">
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/transactionDescription"
-            android:layout_gravity="center"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:nextFocusForward="@+id/saveButton"
-            android:nextFocusDown="@+id/saveButton"
-            android:nextFocusRight="@+id/saveButton"
-            android:nextFocusLeft="@+id/categorySpinner"
-            android:nextFocusUp="@+id/categorySpinner"
-            android:hint="@string/description" />
-    </android.support.design.widget.TextInputLayout>
-    <Button
-        android:id="@+id/saveButton"
-        android:text="@string/saveTransaction"
-        android:layout_width="match_parent"
-        android:nextFocusLeft="@+id/transactionDescription"
-        android:layout_height="wrap_content" />
-</LinearLayout>
+</RelativeLayout>

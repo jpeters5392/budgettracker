@@ -8,6 +8,7 @@ using Android.Support.V4.View;
 using SharedPCL;
 using SharedPCL.models;
 using TinyIoC;
+using BudgetTracker.Utilities;
 
 namespace BudgetTracker
 {
@@ -20,6 +21,7 @@ namespace BudgetTracker
 
 		private const string SelectedNavigationIndex = "SelectedNavigationIndex";
 		private InputUtilities inputUtilities;
+		private FragmentUtilities fragmentUtilities;
 		//private const string AzureUrlSettingName = "azureUrl";
 
 		#region Overrides
@@ -35,6 +37,11 @@ namespace BudgetTracker
 
             base.OnCreate (savedInstanceState);
 
+			// put this here so that base.OnCreate can set up this activity
+			this.fragmentUtilities = new FragmentUtilities(this.SupportFragmentManager, Android.Support.V4.App.FragmentTransaction.TransitFragmentFade, Resource.Id.frameLayout);
+
+			TinyIoCContainer.Current.Register<FragmentUtilities>(this.fragmentUtilities);
+
 			// connect to Azure
 			// Microsoft.WindowsAzure.MobileServices.CurrentPlatform.Init();
 
@@ -42,8 +49,8 @@ namespace BudgetTracker
 			//var activityMetadata = this.PackageManager.GetActivityInfo(this.ComponentName, Android.Content.PM.PackageInfoFlags.Activities|Android.Content.PM.PackageInfoFlags.MetaData).MetaData;
 			//var azureUrl = activityMetadata.GetString(AzureUrlSettingName);
 
-            // Set our view from the "main" layout resource
-            SetContentView (Resource.Layout.Main);
+			// Set our view from the "main" layout resource
+			SetContentView (Resource.Layout.Main);
 
 			// Set the v7 toolbar to be the view's action bar
 			var toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
@@ -64,12 +71,17 @@ namespace BudgetTracker
 
 			// set the transactions fragment to be displayed by default
 			if (savedInstanceState == null) {
-				this.SetFragment (new TransactionEntryFragment());
+				this.fragmentUtilities.Transition(new TransactionEntryFragment());
 			}
 		}
 
-		protected override void OnDestroy ()
+		protected override void OnDestroy()
 		{
+			if (this.fragmentUtilities != null)
+			{
+				this.fragmentUtilities.Dispose();
+			}
+
 			if (this.drawerLayout != null) {
 				this.drawerLayout.Dispose ();
 			}
@@ -134,18 +146,9 @@ namespace BudgetTracker
 					break;
 			}
 
-			this.SetFragment (fragment);
-
 			drawerLayout.CloseDrawers ();
-		}
 
-		/// <summary>
-		/// Sets the currently displayed fragment.
-		/// </summary>
-		/// <param name="fragment">The fragment.</param>
-		private void SetFragment(Android.Support.V4.App.Fragment fragment)
-		{
-			this.SupportFragmentManager.BeginTransaction ().Replace (Resource.Id.frameLayout, fragment).AddToBackStack(null).Commit ();
+			this.fragmentUtilities.Transition(fragment);
 		}
 	}
 }

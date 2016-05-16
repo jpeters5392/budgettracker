@@ -77,6 +77,7 @@
     <Compile Include="fragments\ReportsFragment.cs" />
     <Compile Include="adapters\CategoriesAdapter.cs" />
     <Compile Include="TinyIoC.cs" />
+    <Compile Include="utilities\FragmentUtilities.cs" />
     <Compile Include="viewHolders\CategoryViewHolder.cs" />
     <Compile Include="models\IdTag.cs" />
     <Compile Include="utilities\InputUtilities.cs" />

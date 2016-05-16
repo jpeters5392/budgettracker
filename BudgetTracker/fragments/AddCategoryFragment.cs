@@ -31,6 +31,7 @@ namespace BudgetTracker
 		private TextInputEditText editName;
 		private TextInputLayout descriptionLayout;
 		private TextInputLayout nameLayout;
+		private LinearLayout addCategoryLayout;
 		private IList<string> categoryTypeNames;
 
 		public AddCategoryFragment() : this(TinyIoCContainer.Current.Resolve<ICategoryService>(),
@@ -66,6 +67,7 @@ namespace BudgetTracker
 			this.editName = view.FindViewById<TextInputEditText>(Resource.Id.categoryName);
 			this.nameLayout = view.FindViewById<TextInputLayout>(Resource.Id.categoryNameLayout);
 			this.descriptionLayout = view.FindViewById<TextInputLayout>(Resource.Id.categoryDescriptionLayout);
+			this.addCategoryLayout = view.FindViewById<LinearLayout>(Resource.Id.addCategoryLayout);
 
 			this.categoryTypeSpinner.Touch += OnSpinnerTouched;
 			this.saveButton.Click += OnSave;
@@ -156,6 +158,7 @@ namespace BudgetTracker
 						this.categoryTypeSpinner.SetSelection(0);
 						this.editDescription.ClearFocus();
 						this.editName.ClearFocus();
+						this.addCategoryLayout.RequestFocus();
 						Toast.MakeText(this.Activity, Resource.String.categorySaved, ToastLength.Long).Show();
 					}
 					else

@@ -36,4 +36,6 @@
 	<string name="categoryType">Category Type</string>
 	<string name="failed">Failed</string>
 	<string name="categorySaved">Category Saved</string>
+	<string name="loadingTransactions">Loading Transactions</string>
+	<string name="loadingCategories">Loading Categories</string>
 </resources>
