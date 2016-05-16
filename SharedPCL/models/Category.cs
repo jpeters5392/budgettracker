@@ -27,6 +27,14 @@ namespace BudgetTracker
 			get;
 			set;
 		}
+
+		public string DisplayName
+		{
+			get
+			{
+				return string.Format("{0} - {1}", Enum.GetName(typeof(CategoryType), this.CategoryType), this.Name);
+			}
+		}
 	}
 }
 

@@ -64,9 +64,6 @@ namespace BudgetTracker.Data
 		/// <returns>All of the categories.</returns>
 		public async Task<IList<Category>> RetrieveCategories()
 		{
-			// attempt to sync
-			await this.azureMobileService.SyncTable<Category>(this.azureMobileService.CategoryTable, "allCategories");
-
 			return await this.azureMobileService.CategoryTable.OrderBy(x => x.Name).ToListAsync();
 		}
 
@@ -77,9 +74,6 @@ namespace BudgetTracker.Data
 		/// <param name="id">The identifier.</param>
 		public async Task<Category> RetrieveCategoryById(string id)
 		{
-			// attempt to sync
-			await this.azureMobileService.SyncTable<Category>(this.azureMobileService.CategoryTable, "allCategories");
-
 			return await this.azureMobileService.CategoryTable.LookupAsync(id);
 		}
 
@@ -90,9 +84,6 @@ namespace BudgetTracker.Data
 		/// <param name="name">The name of the category.</param>
 		public async Task<Category> RetrieveCategoryByName(string name)
 		{
-			// attempt to sync
-			await this.azureMobileService.SyncTable<Category>(this.azureMobileService.CategoryTable, "allCategories");
-
 			var results = await this.azureMobileService.CategoryTable.Where(x => x.Name == name).ToEnumerableAsync();
 			return results.FirstOrDefault();
 		}

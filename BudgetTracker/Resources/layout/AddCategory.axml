@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/addCategoryLayout"
+    android:orientation="vertical"
+    android:paddingTop="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusableInTouchMode="true">
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/categoryNameLayout">
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/categoryName"
+            android:layout_gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:nextFocusForward="@+id/description"
+            android:nextFocusRight="@+id/description"
+            android:nextFocusDown="@+id/description"
+            android:hint="@string/categoryName" />
+    </android.support.design.widget.TextInputLayout>
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/descriptionLayout">
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/description"
+            android:layout_gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:nextFocusForward="@+id/categoryTypeSpinner"
+            android:nextFocusRight="@+id/categoryTypeSpinner"
+            android:nextFocusDown="@+id/categoryTypeSpinner"
+            android:hint="@string/description" />
+    </android.support.design.widget.TextInputLayout>
+    <android.support.v7.widget.AppCompatSpinner
+        android:id="@+id/categoryTypeSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:nextFocusForward="@+id/saveButton"
+        android:nextFocusDown="@+id/saveButton"
+        android:nextFocusRight="@+id/saveButton"
+        android:nextFocusLeft="@+id/description"
+        android:prompt="@string/categoryType"
+        android:spinnerMode="dialog" />
+    <Button
+        android:id="@+id/saveButton"
+        android:text="@string/save"
+        android:layout_width="match_parent"
+        android:nextFocusLeft="@+id/transactionDescription"
+        android:layout_height="wrap_content" />
+</LinearLayout>

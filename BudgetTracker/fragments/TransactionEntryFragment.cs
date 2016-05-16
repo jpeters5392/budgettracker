@@ -9,6 +9,8 @@ using SharedPCL;
 using System.Collections.Generic;
 using Android.Support.V7.App;
 using TinyIoC;
+using BudgetTracker.Utilities;
+using SharedPCL.Models;
 
 namespace BudgetTracker
 {
@@ -24,6 +26,7 @@ namespace BudgetTracker
 		private EditText transactionVendor;
 		private EditText transactionDescription;
 		private LinearLayout transactionLayout;
+		private View progressBar;
 		private InputUtilities inputUtilities;
 		private TextInputLayout amountInputLayout;
 		private TextInputLayout vendorInputLayout;
@@ -31,11 +34,13 @@ namespace BudgetTracker
 		private IList<Category> categories;
 		private IList<string> categoryNames;
 		private readonly ILog log;
+		private FragmentUtilities fragmentUtilities;
 
         public TransactionEntryFragment() : this(TinyIoCContainer.Current.Resolve<ITransactionService>(), 
             TinyIoCContainer.Current.Resolve<ICategoryService>(), 
             TinyIoCContainer.Current.Resolve<InputUtilities>(), 
-            TinyIoCContainer.Current.Resolve<ILog>())
+            TinyIoCContainer.Current.Resolve<ILog>(),
+			TinyIoCContainer.Current.Resolve<FragmentUtilities>())
         {
         }
 
@@ -46,12 +51,14 @@ namespace BudgetTracker
 		/// <param name="categoryService">An instance of the Category service.</param>
 		/// <param name="inputUtilities">An instance of input utilities.</param>
 		/// <param name="log">An instance of a logger.</param>
-		public TransactionEntryFragment (ITransactionService transactionService, ICategoryService categoryService, InputUtilities inputUtilities, ILog log)
+		/// <param name="fragmentUtilities">An instance of fragment utilities.</param>
+		public TransactionEntryFragment (ITransactionService transactionService, ICategoryService categoryService, InputUtilities inputUtilities, ILog log, FragmentUtilities fragmentUtilities)
 		{
 			this.transactionService = transactionService;
 			this.categoryService = categoryService;
 			this.inputUtilities = inputUtilities;
 			this.log = log;
+			this.fragmentUtilities = fragmentUtilities;
 		}
 
 		#region Overrides
@@ -63,12 +70,13 @@ namespace BudgetTracker
 			this.transactionVendor = view.FindViewById<EditText> (Resource.Id.transactionVendor);
 			this.transactionDescription = view.FindViewById<EditText> (Resource.Id.transactionDescription);
 			this.transactionLayout = view.FindViewById<LinearLayout> (Resource.Id.transactionLayout);
+			this.progressBar = view.FindViewById<View>(Resource.Id.progressBar);
 			this.amountInputLayout = view.FindViewById<TextInputLayout> (Resource.Id.amountInputLayout);
 			this.vendorInputLayout = view.FindViewById<TextInputLayout> (Resource.Id.vendorInputLayout);
 
 			this.categorySpinner = view.FindViewById<AppCompatSpinner> (Resource.Id.categorySpinner);
 			this.categories = new List<Category>();
-			this.categoryNames = categories.Select (x => x.Name).ToList();
+			this.categoryNames = categories.Select (x => x.DisplayName).ToList();
 			this.categoriesAdapter = new ArrayAdapter<string> (this.Activity, Resource.Layout.support_simple_spinner_dropdown_item, this.categoryNames);
 			this.categorySpinner.Adapter = categoriesAdapter;
 
@@ -81,7 +89,9 @@ namespace BudgetTracker
 			// remove the focus from the edittext
 			this.transactionAmount.ClearFocus ();
 
-            this.Activity.Title = this.Activity.GetString(Resource.String.transactionEntry);
+			this.progressBar.Visibility = ViewStates.Visible;
+
+			this.Activity.Title = this.Activity.GetString(Resource.String.transactionEntry);
 
 			return view;
 		}
@@ -106,8 +116,7 @@ namespace BudgetTracker
                     builder.SetTitle(Resource.String.missingCategories)
                        .SetMessage(Resource.String.emptyCategories)
                        .SetPositiveButton(Resource.String.go, delegate {
-                           var fragment = new CategoriesFragment();
-                           this.FragmentManager.BeginTransaction().Replace(Resource.Id.frameLayout, fragment).AddToBackStack(null).Commit();
+						   this.fragmentUtilities.Transition(new AddCategoryFragment());
                        })
                        .SetNegativeButton(Resource.String.cancel, delegate
                        {
@@ -118,9 +127,11 @@ namespace BudgetTracker
                 }
                 else
                 {
-                    this.categoryNames = categories.Select(x => x.Name).ToList();
+                    this.categoryNames = categories.Select(x => x.DisplayName).OrderBy(x => x).ToList();
                     this.categoriesAdapter = new ArrayAdapter<string>(this.Activity, Resource.Layout.support_simple_spinner_dropdown_item, this.categoryNames);
                     this.categorySpinner.Adapter = categoriesAdapter;
+
+					this.progressBar.Visibility = ViewStates.Invisible;
                 }
 
 				// run this on the UI thread so that it can be updated
@@ -170,6 +181,12 @@ namespace BudgetTracker
 				this.transactionLayout = null;
 			}
 
+			if (this.progressBar != null)
+			{
+				this.progressBar.Dispose();
+				this.progressBar = null;
+			}
+
 			if (this.view != null) {
 				this.view.Dispose ();
 				this.view = null;
@@ -206,6 +223,7 @@ namespace BudgetTracker
 		/// <param name="e">E.</param>
 		public async void SaveTransaction(object sender, EventArgs e)
 		{
+			this.progressBar.Visibility = ViewStates.Visible;
 			// hide the keyboard
 			ClearFocusAndHideKeyboard ();
 
@@ -213,15 +231,21 @@ namespace BudgetTracker
 			var validations = new bool[] { this.ValidateVendor (), this.ValidateAmount (out amount), this.ValidateCategory() };
 
 			if (validations.All(x => x)) {
-				var selectedCategory = await this.categoryService.RetrieveCategoryByName (this.categorySpinner.SelectedItem.ToString ());
-				var transaction = new Transaction ();
-				transaction.CategoryId = selectedCategory.Id;
-				transaction.Id = Guid.NewGuid ().ToString();
-				transaction.Amount = amount;
-				transaction.Vendor = this.transactionVendor.Text;
-				transaction.Description = this.transactionDescription.Text;
+				var selectedCategory = this.categories.Where(x => x.DisplayName == this.categorySpinner.SelectedItem.ToString()).FirstOrDefault();
 				try
 				{
+					if (selectedCategory == default(Category))
+					{
+						throw new CategoryNotFoundException("NO category exists for the key: " + this.categorySpinner.SelectedItem.ToString());
+					}
+
+					var transaction = new Transaction();
+					transaction.CategoryId = selectedCategory.Id;
+					transaction.Id = Guid.NewGuid().ToString();
+					transaction.Amount = amount;
+					transaction.Vendor = this.transactionVendor.Text;
+					transaction.Description = this.transactionDescription.Text;
+
 					await this.transactionService.Insert(transaction);
 
 					// alert the user that it was successful
@@ -243,15 +267,19 @@ namespace BudgetTracker
             {
                 if (!validations[0])
                 {
+                    // they failed to validate the vendor
                     this.transactionVendor.RequestFocus();
                     this.inputUtilities.ShowKeyboard(this.transactionVendor);
                 }
                 else if (!validations[1])
                 {
+                    // they failed to validate the amount
                     this.transactionAmount.RequestFocus();
                     this.inputUtilities.ShowKeyboard(this.transactionAmount);
                 }
             }
+
+			this.progressBar.Visibility = ViewStates.Invisible;
 		}
 
 		/// <summary>

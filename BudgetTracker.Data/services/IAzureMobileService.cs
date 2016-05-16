@@ -13,6 +13,7 @@ namespace BudgetTracker.Data
 		bool IsInitialized { get; set; }
 		Task Initialize();
 		Task<bool> SyncTable<T>(IMobileServiceSyncTable<T> syncTable, string queryId);
+		Task<bool> SyncAll();
 	}
 }
 

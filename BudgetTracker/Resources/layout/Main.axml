@@ -17,6 +17,33 @@
             android:id="@+id/frameLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+        <RelativeLayout
+            android:id="@+id/progressLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="0dp"
+            android:visibility="gone">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true">
+                <TextView
+                    android:id="@+id/progressBarLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textSize="24sp"
+                    android:text="@string/loadingCategories" />
+                <ProgressBar
+                    style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
+                    android:layout_width="fill_parent"
+                    android:layout_height="8dp"
+                    android:layout_marginTop="24dp"
+                    android:indeterminate="true"
+                    android:visibility="visible" />
+            </LinearLayout>
+        </RelativeLayout>
     </LinearLayout>
 <!-- Navigation drawer menu -->
     <android.support.design.widget.NavigationView

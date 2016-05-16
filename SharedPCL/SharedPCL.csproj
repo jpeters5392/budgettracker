@@ -32,6 +32,7 @@
     <NoStdLib>false</NoStdLib>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="models\CategoryNotFoundException.cs" />
     <Compile Include="models\ICategoryTypeService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="models\Category.cs" />

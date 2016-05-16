@@ -9,7 +9,10 @@ using BudgetTracker.Data;
 using SharedPCL;
 using SharedPCL.models;
 using TinyIoC;
+using BudgetTracker.Utilities;
 using Plugin.Connectivity.Abstractions;
+using System.Threading.Tasks;
+using Android.Widget;
 
 namespace BudgetTracker
 {
@@ -19,9 +22,13 @@ namespace BudgetTracker
 	{
 		private DrawerLayout drawerLayout;
 		private NavigationView navigationView;
+		private View progressLayout;
+		private CoordinatorLayout frameLayout;
+		private TextView progressBarLabel;
 
 		private const string SelectedNavigationIndex = "SelectedNavigationIndex";
 		private InputUtilities inputUtilities;
+		private FragmentUtilities fragmentUtilities;
 		private const string AzureUrlSettingName = "azureUrl";
 
 		#region Overrides
@@ -34,6 +41,8 @@ namespace BudgetTracker
             TinyIoCContainer.Current.Register<ICategoryTypeService>(new MockCategoryTypeService());
             TinyIoCContainer.Current.Register<InputUtilities>(this.inputUtilities);
             TinyIoCContainer.Current.Register<IConnectivity>(Plugin.Connectivity.CrossConnectivity.Current);
+
+			
 
             // connect to Azure
             Microsoft.WindowsAzure.MobileServices.CurrentPlatform.Init();
@@ -49,10 +58,13 @@ namespace BudgetTracker
 
             base.OnCreate (savedInstanceState);
 
-			
+			// put this here so that base.OnCreate can set up this activity
+			this.fragmentUtilities = new FragmentUtilities(this.SupportFragmentManager, Android.Support.V4.App.FragmentTransaction.TransitFragmentFade, Resource.Id.frameLayout);
 
-            // Set our view from the "main" layout resource
-            SetContentView (Resource.Layout.Main);
+			TinyIoCContainer.Current.Register<FragmentUtilities>(this.fragmentUtilities);
+
+			// Set our view from the "main" layout resource
+			SetContentView (Resource.Layout.Main);
 
 			// Set the v7 toolbar to be the view's action bar
 			var toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
@@ -67,18 +79,46 @@ namespace BudgetTracker
 			// get references to items in the view
 			this.drawerLayout = FindViewById<DrawerLayout> (Resource.Id.drawerLayout);
 			this.navigationView = FindViewById<NavigationView> (Resource.Id.nav_view);
+			this.progressLayout = FindViewById<View>(Resource.Id.progressLayout);
+			this.frameLayout = FindViewById<CoordinatorLayout>(Resource.Id.frameLayout);
+			this.progressBarLabel = FindViewById<TextView>(Resource.Id.progressBarLabel);
+
+			this.progressLayout.Visibility = ViewStates.Gone;
 
 			// add an event handler for when the user attempts to navigate
 			this.navigationView.NavigationItemSelected += this.NavigateToItem;
 
 			// set the transactions fragment to be displayed by default
 			if (savedInstanceState == null) {
-				this.SetFragment (new TransactionEntryFragment());
+				this.fragmentUtilities.Transition(new TransactionEntryFragment());
 			}
 		}
 
-		protected override void OnDestroy ()
+		protected override void OnDestroy()
 		{
+			if (this.fragmentUtilities != null)
+			{
+				this.fragmentUtilities.Dispose();
+			}
+
+			if (this.progressBarLabel != null)
+			{
+				this.progressBarLabel.Dispose();
+				this.progressBarLabel = null;
+			}
+
+			if (this.frameLayout != null)
+			{
+				this.frameLayout.Dispose();
+				this.frameLayout = null;
+			}
+
+			if (this.progressLayout != null)
+			{
+				this.progressLayout.Dispose();
+				this.progressLayout = null;
+			}
+
 			if (this.drawerLayout != null) {
 				this.drawerLayout.Dispose ();
 			}
@@ -123,38 +163,54 @@ namespace BudgetTracker
         /// </summary>
         /// <param name="sender">Sender.</param>
         /// <param name="e">E.</param>
-        protected void NavigateToItem(object sender, NavigationView.NavigationItemSelectedEventArgs e)
+        protected async void NavigateToItem(object sender, NavigationView.NavigationItemSelectedEventArgs e)
 		{
-			e.MenuItem.SetChecked (true);
-
-            Android.Support.V4.App.Fragment fragment = null;
-
 			switch (e.MenuItem.ItemId)
 			{
 				case Resource.Id.nav_reports:
-					fragment = new ReportsFragment ();
+					this.NavigateToFragment(e.MenuItem, new ReportsFragment());
+					drawerLayout.CloseDrawers();
 					break;
 				case Resource.Id.nav_categories:
-				    fragment = new CategoriesFragment ();
+					this.NavigateToFragment(e.MenuItem, new CategoriesFragment());
+					drawerLayout.CloseDrawers();
+					break;
+				case Resource.Id.azureSync:
+					await PerformSync();
 					break;
 				case Resource.Id.nav_transactions:
 				default:
-				    fragment = new TransactionEntryFragment ();
+					this.NavigateToFragment(e.MenuItem, new TransactionEntryFragment());
+					drawerLayout.CloseDrawers();
 					break;
 			}
 
-			this.SetFragment (fragment);
-
-			drawerLayout.CloseDrawers ();
+			
 		}
 
-		/// <summary>
-		/// Sets the currently displayed fragment.
-		/// </summary>
-		/// <param name="fragment">The fragment.</param>
-		private void SetFragment(Android.Support.V4.App.Fragment fragment)
+		private void NavigateToFragment(IMenuItem menuItem, Android.Support.V4.App.Fragment fragment)
 		{
-			this.SupportFragmentManager.BeginTransaction ().Replace (Resource.Id.frameLayout, fragment).AddToBackStack(null).Commit ();
+			menuItem.SetChecked(true);
+			this.fragmentUtilities.Transition(fragment);
+		}
+
+		private async Task PerformSync()
+		{
+			drawerLayout.CloseDrawers();
+
+			this.frameLayout.Visibility = ViewStates.Gone;
+			this.progressBarLabel.Text = this.GetString(Resource.String.loadingCategories);
+			this.progressLayout.Visibility = ViewStates.Visible;
+
+			// kick off a background sync of the azure data
+			var azureMobileService = TinyIoCContainer.Current.Resolve<IAzureMobileService>();
+			await azureMobileService.SyncTable<Category>(azureMobileService.CategoryTable, "allCategories");
+
+			this.progressBarLabel.Text = this.GetString(Resource.String.loadingTransactions);
+			await azureMobileService.SyncTable<Transaction>(azureMobileService.TransactionTable, "allTransactions");
+
+			this.frameLayout.Visibility = ViewStates.Visible;
+			this.progressLayout.Visibility = ViewStates.Gone;
 		}
 	}
 }

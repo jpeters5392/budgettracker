@@ -78,6 +78,14 @@ namespace BudgetTracker.Data
 			IsInitialized = true;
 		}
 
+		public async Task<bool> SyncAll()
+		{
+			var categorySync = await this.SyncTable<Category>(this.CategoryTable, "allCategories").ConfigureAwait(false);
+			var transactionSync = await this.SyncTable<Transaction>(this.TransactionTable, "allTransactions").ConfigureAwait(false);
+
+			return categorySync && transactionSync;
+		}
+
 		/// <summary>
 		/// Syncs the table for the given model type.
 		/// </summary>
@@ -98,6 +106,16 @@ namespace BudgetTracker.Data
 			{
 				await syncTable.PullAsync(queryId, syncTable.CreateQuery());
 				await MobileService.SyncContext.PushAsync();
+			}
+			catch(MobileServicePushFailedException ex)
+			{
+				this.log.Error(tag, ex, "Error syncing one of the sync tables");
+				foreach (var error in ex.PushResult.Errors)
+				{
+					this.log.Debug(tag, error.RawResult);
+				}
+
+				return false;
 			}
 			catch (Exception ex)
 			{
