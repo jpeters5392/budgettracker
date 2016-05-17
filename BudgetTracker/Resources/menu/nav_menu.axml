@@ -1,19 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-  <group android:checkableBehavior="single" android:id="@+id/navOptions">
-    <item
-      android:id="@+id/nav_transactions"
-      android:checked="true"
-      android:title="@string/transactionEntry" />
-    <item
-      android:id="@+id/nav_categories"
-      android:title="@string/categories" />
-    <item
-      android:id="@+id/nav_reports"
-      android:title="@string/reports" />
-  </group>
-	<group android:id="@+id/otherOptions">
-		<item android:id="@+id/azureSync"
+	<group android:checkableBehavior="single" android:id="@+id/navOptions">
+		<item
+			android:id="@+id/nav_transactions"
+			android:checked="true"
+			android:title="@string/transactionEntry" />
+		<item
+			android:id="@+id/nav_categories"
+			android:title="@string/categories" />
+		<item
+			android:id="@+id/nav_reports"
+			android:title="@string/reports" />
+	</group>
+	<group android:checkableBehavior="single" android:id="@+id/otherOptions">
+		<item android:id="@+id/azureSync" 
+			android:checkable="false"
 			android:title="@string/sync" />
+		<item
+			android:id="@+id/nav_addCategory"
+			android:title="@string/addCategory" />
 	</group>
 </menu>

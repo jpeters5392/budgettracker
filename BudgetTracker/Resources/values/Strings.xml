@@ -39,4 +39,8 @@
 	<string name="loadingTransactions">Loading Transactions</string>
 	<string name="loadingCategories">Loading Categories</string>
 	<string name="sync">Sync</string>
+	<string name="authenticationFailed">Failed to authenticate</string>
+	<string name="selectUser">Select User</string>
+	<string name="loginNewUser">Login with different user</string>
+	<string name="unableUpdateProfile">Unable to update the profile picture</string>
 </resources>

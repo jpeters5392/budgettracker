@@ -96,8 +96,8 @@ namespace BudgetTracker.Data
 		public async Task<bool> SyncTable<T>(IMobileServiceSyncTable<T> syncTable, string queryId)
 		{
 			var isConnected = this.connectivityPlugin.IsConnected;
-			//var isReachable = await this.connectivityPlugin.IsReachable(this.url);
-			if (!isConnected)
+			var isReachable = await this.connectivityPlugin.IsRemoteReachable(this.url);
+			if (!isConnected || !isReachable)
 			{
 				this.log.Debug(tag, "Cannot sync due to no connectivity");
 				return false;

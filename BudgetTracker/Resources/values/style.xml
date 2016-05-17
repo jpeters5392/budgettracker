@@ -3,5 +3,6 @@
 	<style name="AppTheme" parent="Theme.AppCompat">
 		<item name="windowNoTitle">true</item>
 		<item name="windowActionBar">false</item>
+		<item name="android:windowTranslucentStatus">true</item>
 	</style>
 </resources>

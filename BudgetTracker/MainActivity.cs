@@ -13,6 +13,20 @@ using BudgetTracker.Utilities;
 using Plugin.Connectivity.Abstractions;
 using System.Threading.Tasks;
 using Android.Widget;
+using Xamarin.Auth;
+using System;
+using System.Text;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+using System.Linq;
+using SharedPCL.Models;
+using Android.Graphics;
+using System.Net.Http;
+using ModernHttpClient;
+using Android.Graphics.Drawables;
+using BudgetTracker.Data.Services;
+using System.IO;
+using Android.Support.V4.Graphics.Drawable;
 
 namespace BudgetTracker
 {
@@ -20,43 +34,55 @@ namespace BudgetTracker
 	[MetaData(AzureUrlSettingName, Value =" https://budgettrackerilm.azurewebsites.net/")]
 	public class MainActivity : AppCompatActivity
 	{
+		private const string ActivityTag = "MainActivity";
 		private DrawerLayout drawerLayout;
 		private NavigationView navigationView;
 		private View progressLayout;
 		private CoordinatorLayout frameLayout;
 		private TextView progressBarLabel;
+		private Spinner currentUserOptions;
+		private ArrayAdapter<string> userAdapter;
 
+		private const string CurrentUserPreference = "CurrentUserEmail";
 		private const string SelectedNavigationIndex = "SelectedNavigationIndex";
 		private InputUtilities inputUtilities;
 		private FragmentUtilities fragmentUtilities;
 		private const string AzureUrlSettingName = "azureUrl";
+		private string activityName;
+		private ILog logger;
 
 		#region Overrides
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
-            this.inputUtilities = new InputUtilities();
+			this.inputUtilities = new InputUtilities();
 
-            var logger = new Log();
-            TinyIoCContainer.Current.Register<ILog>(logger);
+            this.logger = new Log();
+            TinyIoCContainer.Current.Register<ILog>(this.logger);
             TinyIoCContainer.Current.Register<ICategoryTypeService>(new MockCategoryTypeService());
             TinyIoCContainer.Current.Register<InputUtilities>(this.inputUtilities);
             TinyIoCContainer.Current.Register<IConnectivity>(Plugin.Connectivity.CrossConnectivity.Current);
+			TinyIoCContainer.Current.Register<IProfileService>(new ProfileService(Plugin.Connectivity.CrossConnectivity.Current));
 
 			
 
             // connect to Azure
             Microsoft.WindowsAzure.MobileServices.CurrentPlatform.Init();
 
+			var activityInfo = this.PackageManager.GetActivityInfo(this.ComponentName, Android.Content.PM.PackageInfoFlags.Activities | Android.Content.PM.PackageInfoFlags.MetaData);
+			this.activityName = activityInfo.Name;
+
 			// leaving this here for people who want to try to integrate this with Azure.
-			var activityMetadata = this.PackageManager.GetActivityInfo(this.ComponentName, Android.Content.PM.PackageInfoFlags.Activities|Android.Content.PM.PackageInfoFlags.MetaData).MetaData;
+			var activityMetadata = activityInfo.MetaData;
 			var azureUrl = activityMetadata.GetString(AzureUrlSettingName);
-            var azureMobileService = new AzureMobileService(azureUrl, logger, Plugin.Connectivity.CrossConnectivity.Current);
+            var azureMobileService = new AzureMobileService(azureUrl, this.logger, Plugin.Connectivity.CrossConnectivity.Current);
 
             TinyIoCContainer.Current.Register<IAzureMobileService>(azureMobileService);
-            TinyIoCContainer.Current.Register<ICategoryService>(new CategoryService(azureMobileService, logger));
-            TinyIoCContainer.Current.Register<ITransactionService>(new TransactionService(azureMobileService, logger));
+            TinyIoCContainer.Current.Register<ICategoryService>(new CategoryService(azureMobileService, this.logger));
+            TinyIoCContainer.Current.Register<ITransactionService>(new TransactionService(azureMobileService, this.logger));
 
             base.OnCreate (savedInstanceState);
+
+			TinyIoCContainer.Current.Register<AccountStore>(AccountStore.Create(this));
 
 			// put this here so that base.OnCreate can set up this activity
 			this.fragmentUtilities = new FragmentUtilities(this.SupportFragmentManager, Android.Support.V4.App.FragmentTransaction.TransitFragmentFade, Resource.Id.frameLayout);
@@ -83,6 +109,9 @@ namespace BudgetTracker
 			this.frameLayout = FindViewById<CoordinatorLayout>(Resource.Id.frameLayout);
 			this.progressBarLabel = FindViewById<TextView>(Resource.Id.progressBarLabel);
 
+			this.currentUserOptions = this.navigationView.GetHeaderView(0).FindViewById<Spinner>(Resource.Id.currentUserOptions);
+			this.currentUserOptions.ItemSelected += CurrentUserOptions_ItemSelected;
+
 			this.progressLayout.Visibility = ViewStates.Gone;
 
 			// add an event handler for when the user attempts to navigate
@@ -90,12 +119,24 @@ namespace BudgetTracker
 
 			// set the transactions fragment to be displayed by default
 			if (savedInstanceState == null) {
-				this.fragmentUtilities.Transition(new TransactionEntryFragment());
+				this.BootstrapActivity();
 			}
 		}
 
 		protected override void OnDestroy()
 		{
+			if (this.userAdapter != null)
+			{
+				this.userAdapter.Dispose();
+				this.userAdapter = null;
+			}
+
+			if (this.currentUserOptions != null)
+			{
+				this.currentUserOptions.Dispose();
+				this.currentUserOptions = null;
+			}
+
 			if (this.fragmentUtilities != null)
 			{
 				this.fragmentUtilities.Dispose();
@@ -128,6 +169,8 @@ namespace BudgetTracker
 				this.navigationView.Dispose ();
 			}
 
+			TinyIoCContainer.Current.Dispose();
+
 			base.OnDestroy ();
 		}
 
@@ -156,24 +199,186 @@ namespace BudgetTracker
 
 			return base.OnOptionsItemSelected(item);
 		}
-        #endregion
 
-        /// <summary>
-        /// Navigates to the selected fragment.
-        /// </summary>
-        /// <param name="sender">Sender.</param>
-        /// <param name="e">E.</param>
-        protected async void NavigateToItem(object sender, NavigationView.NavigationItemSelectedEventArgs e)
+		public override void OnBackPressed()
+		{
+			if (this.drawerLayout.IsDrawerOpen(GravityCompat.Start))
+			{
+				this.drawerLayout.CloseDrawers();
+			}
+			else
+			{
+				base.OnBackPressed();
+			}
+		}
+		#endregion
+
+		#region Authentication and Bootstrapping
+		private async Task BootstrapActivity()
+		{
+			var accountStore = TinyIoCContainer.Current.Resolve<AccountStore>();
+			var accounts = await accountStore.FindAccountsForServiceAsync(this.activityName);
+			if (accounts.Count == 0)
+			{
+				this.AuthenticateWithGoogle();
+			}
+			else
+			{
+				this.FinishBootstrapping(accounts);
+			}
+		}
+
+		private void FinishBootstrapping(IList<Account> accounts)
+		{
+			var preferences = this.GetPreferences(Android.Content.FileCreationMode.Private);
+			var currentUserEmail = preferences.GetString(CurrentUserPreference, null);
+			if (currentUserEmail == null)
+			{
+				var defaultUser = accounts.First();
+				currentUserEmail = defaultUser.Username;
+				this.PersistCurrentUser(currentUserEmail);
+			}
+
+			var currentLoggedInUser = accounts.Where(x => x.Username == currentUserEmail).FirstOrDefault();
+			if (currentLoggedInUser == default(Account))
+			{
+				this.AuthenticateWithGoogle();
+				return;
+			}
+
+			UserUtilities userUtilities = new UserUtilities();
+			var user = userUtilities.MapAccountToUser(currentLoggedInUser);
+			TinyIoCContainer.Current.Register<User>(user);
+
+			this.RunOnUiThread(() =>
+			{
+				var accountNames = accounts.Select(x => x.Username).OrderBy(x => x).ToList();
+				var index = accountNames.IndexOf(currentUserEmail);
+				accountNames.Add(this.GetString(Resource.String.loginNewUser));
+				this.userAdapter = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, accountNames);
+				this.currentUserOptions.Adapter = this.userAdapter;
+				this.currentUserOptions.SetSelection(index);
+				var userNameText = this.navigationView.GetHeaderView(0).FindViewById<TextView>(Resource.Id.currentUserName);
+				userNameText.Text = user.Name;
+				
+				// we don't need to navigate to the default fragment here since setting the selection does that
+			});
+		}
+
+		private async void GoogleAuthComplete(object sender, AuthenticatorCompletedEventArgs e)
+		{
+			if (!e.IsAuthenticated)
+			{
+				Toast.MakeText(this, Resource.String.authenticationFailed, ToastLength.Short).Show();
+				return;
+			}
+
+			string accessToken = null;
+			e.Account.Properties.TryGetValue("access_token", out accessToken);
+
+			string accessTokenUrl = "https://www.googleapis.com/oauth2/v2/userinfo";
+			var request = new OAuth2Request("GET", new Uri(accessTokenUrl), null, e.Account);
+			var response = await request.GetResponseAsync();
+			if (response != null)
+			{
+				var responseText = response.GetResponseText();
+
+				// parse the response
+				JObject jsonObject = JObject.Parse(responseText);
+				var username = jsonObject["email"].ToString();
+
+				// create the account and save it 
+				Account user = new Account(username, jsonObject.ToObject<Dictionary<string, string>>());
+				var accountStore = TinyIoCContainer.Current.Resolve<AccountStore>();
+				accountStore.Save(user, this.activityName);
+
+				// persist the current user to preferences
+				this.PersistCurrentUser(username);
+
+				// finish the bootstrapping with the current user
+				var accounts = await accountStore.FindAccountsForServiceAsync(this.activityName);
+				this.FinishBootstrapping(accounts);
+			}
+		}
+
+		private void AuthenticateWithGoogle()
+		{
+			string clientId = "120424818673-oi3c4o7cslo0k4nqbdve7mnrif6c8180.apps.googleusercontent.com";
+			string secret = "eg_SrdQfZILSpv8FEsPBA_qH";
+			string redirectUri = "https://www.googleapis.com/plus/v1/people/me";
+			string authorizeUrl = "https://accounts.google.com/o/oauth2/auth";
+			string scope = "https://www.googleapis.com/auth/userinfo.email";
+			var auth = new OAuth2Authenticator(clientId, scope, new Uri(authorizeUrl), new Uri(redirectUri), null);
+			auth.AllowCancel = true;
+
+			auth.Completed += GoogleAuthComplete;
+
+			var authIntent = auth.GetUI(this);
+			this.StartActivity(authIntent);
+		}
+
+		private void PersistCurrentUser(string username)
+		{
+			var preferences = this.GetPreferences(Android.Content.FileCreationMode.Private);
+			var editor = preferences.Edit();
+			editor.PutString(CurrentUserPreference, username);
+			editor.Commit();
+		}
+		#endregion
+
+		private async void CurrentUserOptions_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
+		{
+			try
+			{
+				if (e.Position == this.userAdapter.Count - 1)
+				{
+					// they selected the login with different user option
+					this.AuthenticateWithGoogle();
+					return;
+				}
+				else
+				{
+					string newUser = this.userAdapter.GetItem(e.Position);
+					this.PersistCurrentUser(newUser);
+
+					// retrieve the user account
+					var accountStore = TinyIoCContainer.Current.Resolve<AccountStore>();
+					var accounts = await accountStore.FindAccountsForServiceAsync(this.activityName);
+					var newUserAccount = accounts.Where(x => x.Username == newUser).First();
+					UserUtilities userUtilities = new UserUtilities();
+					var user = userUtilities.MapAccountToUser(newUserAccount);
+					TinyIoCContainer.Current.Register<User>(user);
+
+					// update the profile picture
+					UpdateProfilePicture(user, this.navigationView.GetHeaderView(0).FindViewById<ImageView>(Resource.Id.profilePicture));
+
+					// go to the default fragment
+					this.fragmentUtilities.Transition(new TransactionEntryFragment());
+				}
+			}
+			catch(Exception ex)
+			{
+				this.logger.Error(ActivityTag, ex, "Error switching users");
+			}
+		}
+
+		/// <summary>
+		/// Navigates to the selected fragment.
+		/// </summary>
+		/// <param name="sender">Sender.</param>
+		/// <param name="e">E.</param>
+		protected async void NavigateToItem(object sender, NavigationView.NavigationItemSelectedEventArgs e)
 		{
 			switch (e.MenuItem.ItemId)
 			{
 				case Resource.Id.nav_reports:
 					this.NavigateToFragment(e.MenuItem, new ReportsFragment());
-					drawerLayout.CloseDrawers();
 					break;
 				case Resource.Id.nav_categories:
 					this.NavigateToFragment(e.MenuItem, new CategoriesFragment());
-					drawerLayout.CloseDrawers();
+					break;
+				case Resource.Id.nav_addCategory:
+					this.NavigateToFragment(e.MenuItem, new AddCategoryFragment());
 					break;
 				case Resource.Id.azureSync:
 					await PerformSync();
@@ -181,7 +386,6 @@ namespace BudgetTracker
 				case Resource.Id.nav_transactions:
 				default:
 					this.NavigateToFragment(e.MenuItem, new TransactionEntryFragment());
-					drawerLayout.CloseDrawers();
 					break;
 			}
 
@@ -192,6 +396,10 @@ namespace BudgetTracker
 		{
 			menuItem.SetChecked(true);
 			this.fragmentUtilities.Transition(fragment);
+			if (this.drawerLayout.IsDrawerOpen(GravityCompat.Start))
+			{
+				this.drawerLayout.CloseDrawers();
+			}
 		}
 
 		private async Task PerformSync()
@@ -211,6 +419,41 @@ namespace BudgetTracker
 
 			this.frameLayout.Visibility = ViewStates.Visible;
 			this.progressLayout.Visibility = ViewStates.Gone;
+		}
+
+		private async Task UpdateProfilePicture(User user, ImageView imageView)
+		{
+			if (user == null)
+			{
+				throw new ArgumentNullException("user", "The User cannot be null");
+			}
+			if (imageView == null)
+			{
+				throw new ArgumentNullException("imageView", "The ImageView cannot be null");
+			}
+
+			var profileService = TinyIoCContainer.Current.Resolve<IProfileService>();
+
+			if (user.Picture != null)
+			{
+				Stream rawPicture = await profileService.FetchProfilePicture(user.Picture);
+				if (rawPicture != null)
+				{
+					using (Bitmap image = await BitmapFactory.DecodeStreamAsync(rawPicture))
+					{
+						using (RoundedBitmapDrawable drawable = RoundedBitmapDrawableFactory.Create(this.Resources, image))
+						{
+							drawable.CornerRadius = Math.Max(image.Height, image.Width) / 2;
+							imageView.SetImageDrawable(drawable);
+						}
+					}
+				}
+				else
+				{
+					Toast.MakeText(this, Resource.String.unableUpdateProfile, ToastLength.Short).Show();
+					imageView.SetImageResource(Android.Resource.Drawable.SymDefAppIcon);
+				}
+			}
 		}
 	}
 }
