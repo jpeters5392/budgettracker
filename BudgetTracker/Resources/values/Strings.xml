@@ -42,5 +42,6 @@
 	<string name="authenticationFailed">Failed to authenticate</string>
 	<string name="selectUser">Select User</string>
 	<string name="loginNewUser">Login with different user</string>
+	<string name="addAccount">Add Account</string>
 	<string name="unableUpdateProfile">Unable to update the profile picture</string>
 </resources>

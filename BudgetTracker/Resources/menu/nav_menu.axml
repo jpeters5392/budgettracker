@@ -20,4 +20,5 @@
 			android:id="@+id/nav_addCategory"
 			android:title="@string/addCategory" />
 	</group>
+	<group android:id="@+id/accountSelector" android:checkableBehavior="none"></group>
 </menu>

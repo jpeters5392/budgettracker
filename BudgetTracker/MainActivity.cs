@@ -41,6 +41,8 @@ namespace BudgetTracker
 		private View progressLayout;
 		private CoordinatorLayout frameLayout;
 		private TextView progressBarLabel;
+		private LinearLayout currentAccount;
+		private ImageView userSelector;
 
 		private const string CurrentUserPreference = "CurrentUserEmail";
 		private const string SelectedNavigationIndex = "SelectedNavigationIndex";
@@ -49,6 +51,9 @@ namespace BudgetTracker
 		private const string AzureUrlSettingName = "azureUrl";
 		private string activityName;
 		private ILog logger;
+		private IList<Tuple<User, int>> userResources = new List<Tuple<User, int>>();
+
+		private bool isAccountSelectorOpen = false;
 
 		#region Overrides
 		protected override void OnCreate (Bundle savedInstanceState)
@@ -107,12 +112,19 @@ namespace BudgetTracker
 			this.progressLayout = FindViewById<View>(Resource.Id.progressLayout);
 			this.frameLayout = FindViewById<CoordinatorLayout>(Resource.Id.frameLayout);
 			this.progressBarLabel = FindViewById<TextView>(Resource.Id.progressBarLabel);
+			this.currentAccount = this.navigationView.GetHeaderView(0).FindViewById<LinearLayout>(Resource.Id.currentAccount);
+			this.userSelector = this.navigationView.GetHeaderView(0).FindViewById<ImageView>(Resource.Id.userSelector);
 
 			this.progressLayout.Visibility = ViewStates.Gone;
 
 			// add an event handler for when the user attempts to navigate
 			this.navigationView.NavigationItemSelected += this.NavigateToItem;
 
+			// add an event handler for when the user tries to switch accounts
+			this.currentAccount.Click += OnClickCurrentAccount;
+
+			// create an event handler for when the navigation drawer is closed
+			this.drawerLayout.DrawerClosed += DrawerLayout_DrawerClosed;
 			// set the transactions fragment to be displayed by default
 			if (savedInstanceState == null) {
 				this.BootstrapActivity();
@@ -121,6 +133,21 @@ namespace BudgetTracker
 
 		protected override void OnDestroy()
 		{
+			this.userResources = null;
+
+			if (this.userSelector != null)
+			{
+				this.userSelector.Dispose();
+				this.userSelector = null;
+			}
+
+			if (this.currentAccount != null)
+			{
+				this.currentAccount.Click -= OnClickCurrentAccount;
+				this.currentAccount.Dispose();
+				this.currentAccount = null;
+			}
+
 			if (this.fragmentUtilities != null)
 			{
 				this.fragmentUtilities.Dispose();
@@ -234,6 +261,7 @@ namespace BudgetTracker
 			var user = userUtilities.MapAccountToUser(currentLoggedInUser);
 			TinyIoCContainer.Current.Register<User>(user);
 
+			// this might be called after a Google authentication, so we can't guarantee it will be on the UI thread
 			this.RunOnUiThread(() =>
 			{
 				var userNameText = this.navigationView.GetHeaderView(0).FindViewById<TextView>(Resource.Id.currentUserName);
@@ -241,6 +269,7 @@ namespace BudgetTracker
 				var emailText = this.navigationView.GetHeaderView(0).FindViewById<TextView>(Resource.Id.currentUserEmail);
 				emailText.Text = currentUserEmail;
 				UpdateProfilePicture(user, this.navigationView.GetHeaderView(0).FindViewById<ImageView>(Resource.Id.profilePicture));
+				this.PopulateAccounts(this.navigationView.Menu, user);
 
 				// go to the default fragment
 				this.fragmentUtilities.Transition(new TransactionEntryFragment());
@@ -308,6 +337,7 @@ namespace BudgetTracker
 		}
 		#endregion
 
+		#region Profile Picture
 		private string BuildDiskCacheDir(string fileName)
 		{
 			string cachePath = (Android.OS.Environment.MediaMounted == Android.OS.Environment.ExternalStorageState) ? this.ExternalCacheDir.Path : this.CacheDir.Path;
@@ -347,96 +377,10 @@ namespace BudgetTracker
 
 			using (FileStream cachedFileStream = File.Create(fileName))
 			{
-				rawPicture.Seek(0, SeekOrigin.Begin);
 				await rawPicture.CopyToAsync(cachedFileStream);
 			}
 
 			return true;
-		}
-
-		private async void SwitchUser(string newUser)
-		{
-			try
-			{
-				if (newUser == null)
-				{
-					// they selected the login with different user option
-					this.AuthenticateWithGoogle();
-					return;
-				}
-				else
-				{
-					this.PersistCurrentUser(newUser);
-
-					// retrieve the user account
-					var accountStore = TinyIoCContainer.Current.Resolve<AccountStore>();
-					var accounts = await accountStore.FindAccountsForServiceAsync(this.activityName);
-					this.FinishBootstrapping(accounts);
-				}
-			}
-			catch(Exception ex)
-			{
-				this.logger.Error(ActivityTag, ex, "Error switching users");
-			}
-		}
-
-		/// <summary>
-		/// Navigates to the selected fragment.
-		/// </summary>
-		/// <param name="sender">Sender.</param>
-		/// <param name="e">E.</param>
-		protected async void NavigateToItem(object sender, NavigationView.NavigationItemSelectedEventArgs e)
-		{
-			switch (e.MenuItem.ItemId)
-			{
-				case Resource.Id.nav_reports:
-					this.NavigateToFragment(e.MenuItem, new ReportsFragment());
-					break;
-				case Resource.Id.nav_categories:
-					this.NavigateToFragment(e.MenuItem, new CategoriesFragment());
-					break;
-				case Resource.Id.nav_addCategory:
-					this.NavigateToFragment(e.MenuItem, new AddCategoryFragment());
-					break;
-				case Resource.Id.azureSync:
-					await PerformSync();
-					break;
-				case Resource.Id.nav_transactions:
-				default:
-					this.NavigateToFragment(e.MenuItem, new TransactionEntryFragment());
-					break;
-			}
-
-			
-		}
-
-		private void NavigateToFragment(IMenuItem menuItem, Android.Support.V4.App.Fragment fragment)
-		{
-			menuItem.SetChecked(true);
-			this.fragmentUtilities.Transition(fragment);
-			if (this.drawerLayout.IsDrawerOpen(GravityCompat.Start))
-			{
-				this.drawerLayout.CloseDrawers();
-			}
-		}
-
-		private async Task PerformSync()
-		{
-			drawerLayout.CloseDrawers();
-
-			this.frameLayout.Visibility = ViewStates.Gone;
-			this.progressBarLabel.Text = this.GetString(Resource.String.loadingCategories);
-			this.progressLayout.Visibility = ViewStates.Visible;
-
-			// kick off a background sync of the azure data
-			var azureMobileService = TinyIoCContainer.Current.Resolve<IAzureMobileService>();
-			await azureMobileService.SyncTable<Category>(azureMobileService.CategoryTable, "allCategories");
-
-			this.progressBarLabel.Text = this.GetString(Resource.String.loadingTransactions);
-			await azureMobileService.SyncTable<Transaction>(azureMobileService.TransactionTable, "allTransactions");
-
-			this.frameLayout.Visibility = ViewStates.Visible;
-			this.progressLayout.Visibility = ViewStates.Gone;
 		}
 
 		private async Task UpdateProfilePicture(User user, ImageView imageView)
@@ -454,15 +398,16 @@ namespace BudgetTracker
 
 			if (user.Picture != null)
 			{
-				var rawPicture = await this.RetrieveCachedPicture(user.Id);
+				//var rawPicture = await this.RetrieveCachedPicture(user.Id);
+				Stream rawPicture = null;
 				if (rawPicture == null)
 				{
 					rawPicture = await profileService.FetchProfilePicture(user.Picture);
 
 					if (rawPicture != null)
 					{
-						await this.SaveCachedPicture(user.Id, rawPicture);
-						rawPicture.Seek(0, SeekOrigin.Begin);
+						//await this.SaveCachedPicture(user.Id, rawPicture);
+						//rawPicture.Seek(0, SeekOrigin.Begin);
 					}
 				}
 
@@ -483,6 +428,201 @@ namespace BudgetTracker
 					imageView.SetImageResource(Android.Resource.Drawable.SymDefAppIcon);
 				}
 			}
+		}
+		#endregion
+
+		#region Switch Logged in User
+		protected void OnClickCurrentAccount(object sender, EventArgs e)
+		{		
+			this.ToggleAccountSelector();
+		}
+
+		#region Navigation Menu
+		private void PopulateAccounts(IMenu menu, User currentUser)
+		{
+			var accountStore = TinyIoCContainer.Current.Resolve<AccountStore>();
+			var accounts = accountStore.FindAccountsForService(this.activityName);
+			var userUtilities = new UserUtilities();
+			var index = -1;
+			foreach (var account in accounts)
+			{
+				index += 1;
+				var user = userUtilities.MapAccountToUser(account);
+
+				// check to see if this account has already been added to the menu
+				var currentUserResource = this.userResources.Where(x => x.Item1.Id == user.Id).FirstOrDefault();
+				if (currentUserResource != default(Tuple<User, int>))
+				{
+					if (user.Id == currentUser.Id)
+					{
+						// remove the current user
+						menu.RemoveItem(currentUserResource.Item2);
+					}
+					else if (menu.FindItem(currentUserResource.Item2) == null)
+					{
+						// it was added and then removed, so re-add it back
+						var reAddedMenuItem = menu.Add(Resource.Id.accountSelector, currentUserResource.Item2, index, user.Email);
+					}
+
+					continue;
+				}
+
+				if (user.Id == currentUser.Id)
+				{
+					// don't add them if they are the current user
+					continue;
+				}
+
+				int userId = View.GenerateViewId();
+				this.userResources.Add(new Tuple<User, int>(user, userId));
+				var newMenuItem = menu.Add(Resource.Id.accountSelector, userId, index, user.Email);
+				//newMenuItem.SetIcon = 
+			}
+
+			if (menu.FindItem(Resource.String.addAccount) == null)
+			{
+				var addAccountMenuItem = menu.Add(Resource.Id.accountSelector, Resource.String.addAccount, 99, Resource.String.addAccount);
+				addAccountMenuItem.SetIcon(Resource.Drawable.ic_add_white);
+			}
+
+			menu.SetGroupVisible(Resource.Id.accountSelector, false);
+		}
+
+		private void ToggleAccountSelector()
+		{
+			if (isAccountSelectorOpen)
+			{
+				this.userSelector.SetImageResource(Android.Resource.Drawable.ArrowDownFloat);
+				this.navigationView.Menu.SetGroupVisible(Resource.Id.accountSelector, false);
+				this.navigationView.Menu.SetGroupVisible(Resource.Id.otherOptions, true);
+				this.navigationView.Menu.SetGroupVisible(Resource.Id.navOptions, true);
+			}
+			else
+			{
+				this.userSelector.SetImageResource(Android.Resource.Drawable.ArrowUpFloat);
+				this.navigationView.Menu.SetGroupVisible(Resource.Id.accountSelector, true);
+				this.navigationView.Menu.SetGroupVisible(Resource.Id.otherOptions, false);
+				this.navigationView.Menu.SetGroupVisible(Resource.Id.navOptions, false);
+			}
+
+			isAccountSelectorOpen = !isAccountSelectorOpen;
+		}
+		#endregion
+
+		private void DrawerLayout_DrawerClosed(object sender, DrawerLayout.DrawerClosedEventArgs e)
+		{
+			if (isAccountSelectorOpen)
+			{
+				this.ToggleAccountSelector();
+			}
+		}
+
+		private async void SwitchUser(string newUserEmail)
+		{
+			try
+			{
+				if (newUserEmail == null)
+				{
+					// they selected the login with different user option
+					this.AuthenticateWithGoogle();
+					return;
+				}
+				else
+				{
+					this.PersistCurrentUser(newUserEmail);
+
+					// retrieve the user account
+					var accountStore = TinyIoCContainer.Current.Resolve<AccountStore>();
+					var accounts = await accountStore.FindAccountsForServiceAsync(this.activityName);
+					this.FinishBootstrapping(accounts);
+					this.ToggleAccountSelector();
+				}
+			}
+			catch (Exception ex)
+			{
+				this.logger.Error(ActivityTag, ex, "Error switching users");
+			}
+		}
+		#endregion
+
+		/// <summary>
+		/// Navigates to the selected fragment.
+		/// </summary>
+		/// <param name="sender">Sender.</param>
+		/// <param name="e">E.</param>
+		protected async void NavigateToItem(object sender, NavigationView.NavigationItemSelectedEventArgs e)
+		{
+			switch (e.MenuItem.ItemId)
+			{
+				case Resource.Id.nav_reports:
+					this.NavigateToFragment(e.MenuItem, new ReportsFragment());
+					return;
+				case Resource.Id.nav_categories:
+					this.NavigateToFragment(e.MenuItem, new CategoriesFragment());
+					return;
+				case Resource.Id.nav_addCategory:
+					this.NavigateToFragment(e.MenuItem, new AddCategoryFragment());
+					return;
+				case Resource.Id.azureSync:
+					await PerformSync();
+					return;
+				case Resource.String.addAccount:
+					SwitchUser(null);
+					return;
+				case Resource.Id.nav_transactions:
+					this.NavigateToFragment(e.MenuItem, new TransactionEntryFragment());
+					return;
+			}
+
+			// check to see if they clicked on a user account
+			var user = FindUserResource(e.MenuItem.ItemId);
+			if (user != default(User))
+			{
+				SwitchUser(user.Email);
+				return;
+			}
+
+			this.NavigateToFragment(e.MenuItem, new TransactionEntryFragment());
+			return;
+		}
+
+		private void NavigateToFragment(IMenuItem menuItem, Android.Support.V4.App.Fragment fragment)
+		{
+			menuItem.SetChecked(true);
+			this.fragmentUtilities.Transition(fragment);
+			if (this.drawerLayout.IsDrawerOpen(GravityCompat.Start))
+			{
+				this.drawerLayout.CloseDrawers();
+			}
+		}
+
+		private User FindUserResource(int resourceId)
+		{
+			if (this.userResources.Any(x => x.Item2 == resourceId))
+			{
+				return this.userResources.Where(x => x.Item2 == resourceId).Single().Item1;
+			}
+
+			return default(User);
+		}
+
+		private async Task PerformSync()
+		{
+			drawerLayout.CloseDrawers();
+
+			this.frameLayout.Visibility = ViewStates.Gone;
+			this.progressBarLabel.Text = this.GetString(Resource.String.loadingCategories);
+			this.progressLayout.Visibility = ViewStates.Visible;
+
+			// kick off a background sync of the azure data
+			var azureMobileService = TinyIoCContainer.Current.Resolve<IAzureMobileService>();
+			await azureMobileService.SyncTable<Category>(azureMobileService.CategoryTable, "allCategories");
+
+			this.progressBarLabel.Text = this.GetString(Resource.String.loadingTransactions);
+			await azureMobileService.SyncTable<Transaction>(azureMobileService.TransactionTable, "allTransactions");
+
+			this.frameLayout.Visibility = ViewStates.Visible;
+			this.progressLayout.Visibility = ViewStates.Gone;
 		}
 	}
 }
