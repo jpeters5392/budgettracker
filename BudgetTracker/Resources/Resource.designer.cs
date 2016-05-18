@@ -2033,11 +2033,11 @@ namespace BudgetTracker
 			// aapt resource value: 0x7f07004b
 			public const int contentPanel = 2131165259;
 			
+			// aapt resource value: 0x7f07008d
+			public const int currentUserEmail = 2131165325;
+			
 			// aapt resource value: 0x7f07008c
 			public const int currentUserName = 2131165324;
-			
-			// aapt resource value: 0x7f07008d
-			public const int currentUserOptions = 2131165325;
 			
 			// aapt resource value: 0x7f070051
 			public const int custom = 2131165265;

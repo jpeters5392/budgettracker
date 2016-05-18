@@ -27,6 +27,7 @@ using Android.Graphics.Drawables;
 using BudgetTracker.Data.Services;
 using System.IO;
 using Android.Support.V4.Graphics.Drawable;
+using Android.Content;
 
 namespace BudgetTracker
 {
@@ -40,8 +41,6 @@ namespace BudgetTracker
 		private View progressLayout;
 		private CoordinatorLayout frameLayout;
 		private TextView progressBarLabel;
-		private Spinner currentUserOptions;
-		private ArrayAdapter<string> userAdapter;
 
 		private const string CurrentUserPreference = "CurrentUserEmail";
 		private const string SelectedNavigationIndex = "SelectedNavigationIndex";
@@ -109,9 +108,6 @@ namespace BudgetTracker
 			this.frameLayout = FindViewById<CoordinatorLayout>(Resource.Id.frameLayout);
 			this.progressBarLabel = FindViewById<TextView>(Resource.Id.progressBarLabel);
 
-			this.currentUserOptions = this.navigationView.GetHeaderView(0).FindViewById<Spinner>(Resource.Id.currentUserOptions);
-			this.currentUserOptions.ItemSelected += CurrentUserOptions_ItemSelected;
-
 			this.progressLayout.Visibility = ViewStates.Gone;
 
 			// add an event handler for when the user attempts to navigate
@@ -125,18 +121,6 @@ namespace BudgetTracker
 
 		protected override void OnDestroy()
 		{
-			if (this.userAdapter != null)
-			{
-				this.userAdapter.Dispose();
-				this.userAdapter = null;
-			}
-
-			if (this.currentUserOptions != null)
-			{
-				this.currentUserOptions.Dispose();
-				this.currentUserOptions = null;
-			}
-
 			if (this.fragmentUtilities != null)
 			{
 				this.fragmentUtilities.Dispose();
@@ -252,16 +236,14 @@ namespace BudgetTracker
 
 			this.RunOnUiThread(() =>
 			{
-				var accountNames = accounts.Select(x => x.Username).OrderBy(x => x).ToList();
-				var index = accountNames.IndexOf(currentUserEmail);
-				accountNames.Add(this.GetString(Resource.String.loginNewUser));
-				this.userAdapter = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, accountNames);
-				this.currentUserOptions.Adapter = this.userAdapter;
-				this.currentUserOptions.SetSelection(index);
 				var userNameText = this.navigationView.GetHeaderView(0).FindViewById<TextView>(Resource.Id.currentUserName);
 				userNameText.Text = user.Name;
-				
-				// we don't need to navigate to the default fragment here since setting the selection does that
+				var emailText = this.navigationView.GetHeaderView(0).FindViewById<TextView>(Resource.Id.currentUserEmail);
+				emailText.Text = currentUserEmail;
+				UpdateProfilePicture(user, this.navigationView.GetHeaderView(0).FindViewById<ImageView>(Resource.Id.profilePicture));
+
+				// go to the default fragment
+				this.fragmentUtilities.Transition(new TransactionEntryFragment());
 			});
 		}
 
@@ -326,11 +308,57 @@ namespace BudgetTracker
 		}
 		#endregion
 
-		private async void CurrentUserOptions_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
+		private string BuildDiskCacheDir(string fileName)
+		{
+			string cachePath = (Android.OS.Environment.MediaMounted == Android.OS.Environment.ExternalStorageState) ? this.ExternalCacheDir.Path : this.CacheDir.Path;
+			return System.IO.Path.Combine(cachePath, fileName);
+		}
+
+		private string BuildPictureFilename(string userId)
+		{
+			return this.BuildDiskCacheDir(userId + ".bmp");
+		}
+
+		private async Task<Stream> RetrieveCachedPicture(string userId)
+		{
+			string fileName = this.BuildPictureFilename(userId);
+			Stream file = await Task.Run(() =>
+			{
+				if (File.Exists(fileName))
+				{
+					return File.OpenRead(fileName);
+				}
+
+				return null;
+			});
+			return file;
+		}
+
+		private async Task<bool> SaveCachedPicture(string userId, Stream rawPicture)
+		{
+			string fileName = this.BuildPictureFilename(userId);
+			await Task.Run(() =>
+			{
+				if (File.Exists(fileName))
+				{
+					File.Delete(fileName);
+				}
+			}).ConfigureAwait(false);
+
+			using (FileStream cachedFileStream = File.Create(fileName))
+			{
+				rawPicture.Seek(0, SeekOrigin.Begin);
+				await rawPicture.CopyToAsync(cachedFileStream);
+			}
+
+			return true;
+		}
+
+		private async void SwitchUser(string newUser)
 		{
 			try
 			{
-				if (e.Position == this.userAdapter.Count - 1)
+				if (newUser == null)
 				{
 					// they selected the login with different user option
 					this.AuthenticateWithGoogle();
@@ -338,22 +366,12 @@ namespace BudgetTracker
 				}
 				else
 				{
-					string newUser = this.userAdapter.GetItem(e.Position);
 					this.PersistCurrentUser(newUser);
 
 					// retrieve the user account
 					var accountStore = TinyIoCContainer.Current.Resolve<AccountStore>();
 					var accounts = await accountStore.FindAccountsForServiceAsync(this.activityName);
-					var newUserAccount = accounts.Where(x => x.Username == newUser).First();
-					UserUtilities userUtilities = new UserUtilities();
-					var user = userUtilities.MapAccountToUser(newUserAccount);
-					TinyIoCContainer.Current.Register<User>(user);
-
-					// update the profile picture
-					UpdateProfilePicture(user, this.navigationView.GetHeaderView(0).FindViewById<ImageView>(Resource.Id.profilePicture));
-
-					// go to the default fragment
-					this.fragmentUtilities.Transition(new TransactionEntryFragment());
+					this.FinishBootstrapping(accounts);
 				}
 			}
 			catch(Exception ex)
@@ -436,7 +454,18 @@ namespace BudgetTracker
 
 			if (user.Picture != null)
 			{
-				Stream rawPicture = await profileService.FetchProfilePicture(user.Picture);
+				var rawPicture = await this.RetrieveCachedPicture(user.Id);
+				if (rawPicture == null)
+				{
+					rawPicture = await profileService.FetchProfilePicture(user.Picture);
+
+					if (rawPicture != null)
+					{
+						await this.SaveCachedPicture(user.Id, rawPicture);
+						rawPicture.Seek(0, SeekOrigin.Begin);
+					}
+				}
+
 				if (rawPicture != null)
 				{
 					using (Bitmap image = await BitmapFactory.DecodeStreamAsync(rawPicture))

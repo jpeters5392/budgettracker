@@ -2,34 +2,36 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="192dp"
-    android:background="?attr/colorPrimaryDark"
-    android:paddingBottom="8dp"
-	android:paddingLeft="16dp"
-	android:paddingRight="16dp"
-	android:paddingTop="40dp"
-    android:gravity="bottom">
-	<ImageView
-		android:id="@+id/profilePicture"
-		android:layout_width="64dp"
-		android:layout_height="64dp"
-		android:contentDescription="Profile Picture"
-		android:src="@android:drawable/sym_def_app_icon" />
-	<TextView 
-		android:id="@+id/currentUserName"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_above="@+id/currentUserOptions"
-		android:textSize="14sp"
-		android:fontFamily="sans-serif-medium" />
-	<android.support.v7.widget.AppCompatSpinner
-        android:id="@+id/currentUserOptions"
+    android:background="?attr/colorPrimaryDark">
+    <ImageView
+        android:id="@+id/profilePicture"
+        android:layout_width="76dp"
+		android:layout_marginLeft="16dp"
+		android:layout_marginStart="16dp"
+        android:layout_height="76dp"
+		android:layout_centerVertical="true"
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentStart="true"
+        android:contentDescription="Profile Picture"
+        android:src="@android:drawable/sym_def_app_icon" />
+    <TextView
+        android:id="@+id/currentUserName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:prompt="@string/selectUser"
-        android:contentDescription="@string/selectUser"
-        android:spinnerMode="dialog"
-		android:textSize="14sp"
-		android:fontFamily="sans-serif"
-		android:paddingLeft="0dp"
-		android:layout_alignParentBottom="true"/>
+        android:layout_above="@+id/currentUserEmail"
+		android:layout_alignLeft="@+id/profilePicture"
+		android:layout_alignStart="@+id/profilePicture"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif-medium" />
+	<TextView
+        android:id="@+id/currentUserEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+		android:gravity="left"
+        android:fontFamily="sans-serif"
+		android:layout_marginBottom="8dp"
+		android:layout_alignLeft="@+id/currentUserName"
+		android:layout_alignStart="@+id/currentUserName"
+        android:layout_alignParentBottom="true" />
 </RelativeLayout>
