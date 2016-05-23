@@ -34,6 +34,7 @@
   <ItemGroup>
     <Compile Include="models\CategoryNotFoundException.cs" />
     <Compile Include="models\ICategoryTypeService.cs" />
+    <Compile Include="models\IProfileCacheService.cs" />
     <Compile Include="models\IProfileService.cs" />
     <Compile Include="models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

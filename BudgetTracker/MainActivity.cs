@@ -28,6 +28,7 @@ using BudgetTracker.Data.Services;
 using System.IO;
 using Android.Support.V4.Graphics.Drawable;
 using Android.Content;
+using BudgetTracker.Services;
 
 namespace BudgetTracker
 {
@@ -65,7 +66,7 @@ namespace BudgetTracker
             TinyIoCContainer.Current.Register<ICategoryTypeService>(new MockCategoryTypeService());
             TinyIoCContainer.Current.Register<InputUtilities>(this.inputUtilities);
             TinyIoCContainer.Current.Register<IConnectivity>(Plugin.Connectivity.CrossConnectivity.Current);
-			TinyIoCContainer.Current.Register<IProfileService>(new ProfileService(Plugin.Connectivity.CrossConnectivity.Current));
+			
 
 			
 
@@ -85,6 +86,10 @@ namespace BudgetTracker
             TinyIoCContainer.Current.Register<ITransactionService>(new TransactionService(azureMobileService, this.logger));
 
             base.OnCreate (savedInstanceState);
+
+			var profileCacheService = new ProfileCacheService(this.ExternalCacheDir.Path, this.CacheDir.Path);
+			TinyIoCContainer.Current.Register<IProfileCacheService>(profileCacheService);
+			TinyIoCContainer.Current.Register<IProfileService>(new ProfileService(Plugin.Connectivity.CrossConnectivity.Current, profileCacheService));
 
 			TinyIoCContainer.Current.Register<AccountStore>(AccountStore.Create(this));
 
@@ -338,51 +343,6 @@ namespace BudgetTracker
 		#endregion
 
 		#region Profile Picture
-		private string BuildDiskCacheDir(string fileName)
-		{
-			string cachePath = (Android.OS.Environment.MediaMounted == Android.OS.Environment.ExternalStorageState) ? this.ExternalCacheDir.Path : this.CacheDir.Path;
-			return System.IO.Path.Combine(cachePath, fileName);
-		}
-
-		private string BuildPictureFilename(string userId)
-		{
-			return this.BuildDiskCacheDir(userId + ".bmp");
-		}
-
-		private async Task<Stream> RetrieveCachedPicture(string userId)
-		{
-			string fileName = this.BuildPictureFilename(userId);
-			Stream file = await Task.Run(() =>
-			{
-				if (File.Exists(fileName))
-				{
-					return File.OpenRead(fileName);
-				}
-
-				return null;
-			});
-			return file;
-		}
-
-		private async Task<bool> SaveCachedPicture(string userId, Stream rawPicture)
-		{
-			string fileName = this.BuildPictureFilename(userId);
-			await Task.Run(() =>
-			{
-				if (File.Exists(fileName))
-				{
-					File.Delete(fileName);
-				}
-			}).ConfigureAwait(false);
-
-			using (FileStream cachedFileStream = File.Create(fileName))
-			{
-				await rawPicture.CopyToAsync(cachedFileStream);
-			}
-
-			return true;
-		}
-
 		private async Task UpdateProfilePicture(User user, ImageView imageView)
 		{
 			if (user == null)
@@ -398,34 +358,30 @@ namespace BudgetTracker
 
 			if (user.Picture != null)
 			{
-				//var rawPicture = await this.RetrieveCachedPicture(user.Id);
-				Stream rawPicture = null;
-				if (rawPicture == null)
+				Stream cachedPicture = await profileService.FetchProfilePictureWithCache(user.Id, user.Picture);
+				try
 				{
-					rawPicture = await profileService.FetchProfilePicture(user.Picture);
-
-					if (rawPicture != null)
+					if (cachedPicture != null)
 					{
-						//await this.SaveCachedPicture(user.Id, rawPicture);
-						//rawPicture.Seek(0, SeekOrigin.Begin);
-					}
-				}
-
-				if (rawPicture != null)
-				{
-					using (Bitmap image = await BitmapFactory.DecodeStreamAsync(rawPicture))
-					{
-						using (RoundedBitmapDrawable drawable = RoundedBitmapDrawableFactory.Create(this.Resources, image))
+						var imageService = new RoundedImageService();
+						var roundedDrawable = await imageService.CreateRoundedImage(this.Resources, cachedPicture);
+						using (roundedDrawable)
 						{
-							drawable.CornerRadius = Math.Max(image.Height, image.Width) / 2;
-							imageView.SetImageDrawable(drawable);
+							imageView.SetImageDrawable(roundedDrawable);
 						}
 					}
+					else
+					{
+						Toast.MakeText(this, Resource.String.unableUpdateProfile, ToastLength.Short).Show();
+						imageView.SetImageResource(Android.Resource.Drawable.SymDefAppIcon);
+					}
 				}
-				else
+				finally
 				{
-					Toast.MakeText(this, Resource.String.unableUpdateProfile, ToastLength.Short).Show();
-					imageView.SetImageResource(Android.Resource.Drawable.SymDefAppIcon);
+					if (cachedPicture != null)
+					{
+						cachedPicture.Dispose();
+					}
 				}
 			}
 		}

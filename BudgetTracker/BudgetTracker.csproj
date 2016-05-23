@@ -128,6 +128,8 @@
     <Compile Include="fragments\CategoriesFragment.cs" />
     <Compile Include="fragments\ReportsFragment.cs" />
     <Compile Include="adapters\CategoriesAdapter.cs" />
+    <Compile Include="services\ProfileCacheService.cs" />
+    <Compile Include="services\RoundedImageService.cs" />
     <Compile Include="TinyIoC.cs" />
     <Compile Include="utilities\FragmentUtilities.cs" />
     <Compile Include="utilities\UserUtilities.cs" />

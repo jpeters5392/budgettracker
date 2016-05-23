@@ -10,5 +10,11 @@ namespace SharedPCL.Models
 	public interface IProfileService
 	{
 		Task<Stream> FetchProfilePicture(string url);
+
+		Task<Stream> FetchCachedPicture(string userId);
+
+		Task<Stream> CachePicture(string userId, Stream picture);
+
+		Task<Stream> FetchProfilePictureWithCache(string userId, string url);
 	}
 }
